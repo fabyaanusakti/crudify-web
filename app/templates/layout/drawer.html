@@ -1,0 +1,127 @@
+{% load custom_filters %}
+{% load static %}
+{% include 'layout/modals.html' %}
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold">Menu Utama</h5>
+    </div>
+    <div class="d-flex align-items-center px-3 py-2">
+        {% if request.user.is_authenticated %}
+            <img src="{{ request.user.picture.url }}" alt="Profile Picture"
+                 class="rounded-circle me-2"
+                 style="width: 32px; height: 32px; object-fit: cover;">
+            <a href="{% url 'profile' %}" class="text-decoration-none text-dark fw-semibold">
+                {{ request.user.username }}
+            </a>
+        {% else %}
+        <span class="material-icons me-2" style="font-size: 20px;">account_circle</span>
+            <a href="{% url 'login' %}" class="text-decoration-none text-dark fw-semibold">
+                Masuk
+            </a>
+        {% endif %}
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-unstyled">
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'home' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Dashboard
+                </a>
+                {% else %}
+                <a href="{% url 'home' %}" class="d-block py-1">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'projek' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Projek
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                     <i class="fa-solid fa-lock"></i> Projek
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'objectives_view' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Meaningful Objectives
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                    <i class="fa-solid fa-lock"></i> Meaningful Objectives
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'experience_view' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Intelligence Experience
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                    <i class="fa-solid fa-lock"></i> Intelligence Experience
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'implementation_view' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Intelligence implementation
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                    <i class="fa-solid fa-lock"></i> Intelligence implementation
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'limitation_view' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Batasan Pengembangan
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                    <i class="fa-solid fa-lock"></i> Batasan Pengembangan
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'realization_view' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Status Realisasi
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                    <i class="fa-solid fa-lock"></i> Status Realisasi
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'planning_view' %}" class="d-block py-1">
+                    <i class="fa-solid fa-chevron-right"></i> Perencanaan
+                </a>
+                {% else %}
+                <a href="#" class="d-block py-1 text-muted text-secondary disabled"
+                    onclick="return handleMenuClick(this, 'true')">
+                    <i class="fa-solid fa-lock"></i> Perencanaan
+                </a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'logout' %}" class="btn btn-danger position-absolute bottom-0 end-0 m-3">
+        <i class="fa-solid fa-door-open"></i> Logout</a>
+    {% else %}
+    {% endif %}
+</div>

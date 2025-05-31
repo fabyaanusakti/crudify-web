@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* PDF-specific styles */
+        body { font-family: Arial; padding: 20px; }
+        h1 { color: #333; }
+        /* Add other styles as needed */
+    </style>
+</head>
+<body>
+    <!-- Only include content you want in PDF -->
+    <h1>{{ project.nama_projek }}</h1>
+    
+    <!-- Rest of your content sections -->
+      <h2>Meaningful Objective</h2>
+      {% if objective %}
+      <ul>
+        <li><strong>Organization Objective: </strong>{{ objective.organizational }}</li>
+        <li><strong>Leading Indicator: </strong>{{ objective.leading_indicators }}</li>
+        <li><strong>User Outcomes: </strong>{{ objective.user_outcomes }}</li>
+        <li><strong>Model Properties: </strong>{{ objective.model_properties }}</li>
+      </ul>
+      {% endif %}
+
+      <h2>Intelligence Experience</h2>
+      {% if experience %}
+      <ul>
+        <li><strong>Automate:</strong> {{ experience.automate }}</li>
+        <li><strong>Prompt:</strong> {{ experience.prompt }}</li>
+        <li><strong>Annotate:</strong> {{ experience.annotate }}</li>
+        <li><strong>Organization:</strong> {{ experience.organization }}</li>
+        <li><strong>System Objectives:</strong> {{ experience.system_objectives }}</li>
+        <li><strong>Minimize Flaws:</strong> {{ experience.minimize_flaws }}</li>
+        <li><strong>Create Data:</strong> {{ experience.create_data }}</li>
+      </ul>
+      {% endif %}
+
+      <h2>Intelligence Implementation</h2>
+      {% if implementation %}
+      <ul>
+        <li><strong>Business Process:</strong> {{ implementation.business_process }}</li>
+        <li><strong>Technology:</strong> {{ implementation.technology }}</li>
+        <li><strong>Build Process:</strong> {{ implementation.build_process }}</li>
+      </ul>
+      {% endif %}
+
+      <h2>Limitation</h2>
+      {% if limitation %}
+      <p>{{ limitation.limitation }}</p>
+      {% endif %}
+
+      <h2>Realization</h2>
+      {% if realization %}
+      <p>{{ realization.realization }}</p>
+      {% endif %}
+
+      <h2>Planning</h2>
+      {% if planning %}
+      <ul>
+        <li><strong>Deployment:</strong> {{ planning.deployment }}</li>
+        <li><strong>Maintenance:</strong> {{ planning.maintenance }}</li>
+        <li><strong>Operating System:</strong> {{ planning.operating }}</li>
+      </ul>
+      {% endif %}
+</body>
+</html>

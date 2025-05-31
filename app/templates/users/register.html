@@ -1,0 +1,25 @@
+{% extends 'layout/base.html' %}
+
+{% block title %} CRUDify | Register {% endblock %}
+
+{% block content %}
+<div class="p-4 rounded-2 shadow-sm border-2" style="width: 450px;">
+    <h2 class="text-center fw-bold mb-3 fs-4">Halo! Daftar untuk memulai</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="mb-3">
+            {{ field }}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="form-submit btn btn-login w-100"
+            style="background-color: #3d5a71; color: white">Daftar</button>
+    </form>
+
+    <div class="text-center mt-3">
+        Sudah punya akun? <a href="{% url 'login' %}" class="text-primary text-decoration-none">Masuk sekarang</a>
+    </div>
+</div>
+{% endblock %}

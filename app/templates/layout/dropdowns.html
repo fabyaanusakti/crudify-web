@@ -1,0 +1,11 @@
+{% block dropdowns_project %}
+<label class="form-label"><p>Pilih Projek:</p></label>
+<select name="project" class="form-select mb-2 w-50 shadow-sm border-1" id="project-selector">
+    <option value="" disabled {% if not project %}selected{% endif %}>Pilih Projek</option>
+    {% for proj in projects %}
+        <option value="{{ proj.pk }}" {% if project and proj.pk == project.pk %}selected{% endif %}>
+            {{ proj.nama_projek }}
+        </option>
+    {% endfor %}
+</select>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'layout/base.html' %}
+
+
+{% load static %}
+
+{% block title %} CRUDify {% endblock %}
+
+{% block content %}
+<div class="p-4 rounded-2 shadow-sm border-2" style="width: 1080px;">
+    {% if user.is_authenticated %}
+    <h2 class="text-center fw-bold mb-0 fs-4">
+        Dashboard
+    </h2>
+    <div class="content">
+        <canvas id="statusChart1" width="400" height="200" class="mb-0"></canvas>
+        {% else %}
+        <div class="unauthenticated-users">
+            <div class="content-container text-center">
+                <img src="{% static 'images/logo.png' %}" alt="Profile Image" class="profile-img">
+                <h3 class="title">CRUDIFY</h3>
+                <h5 class="subtitle">Intelligence Engineering</h5>
+                <p>Kelompok 5</p>
+            </div>
+            <div class="content-list">
+                <ol>
+                    <li>Merekam meaningful objectives yang telah ditetapkan pelaksana proyek. Paling tidak ada 4
+                        objectives yaitu:
+                        organizational objectives, leading indicator, user outcomes, dan model properties.</li>
+                    <li>Merekam intelligence experience, yang paling tidak berisi (1) penyajian kecerdasan berupa
+                        satu atau lebih cara yaitu
+                        automate, prompt, organisation, dan atau annotate, (2) fungsi-fungsi yang dapat
+                        merealisasikan meaningful objectives; (3) bagaimana meminimalkan kesalahan perangkat lunak;
+                        (4) pengumpulan data untuk perbaikan perangkat lunak.</li>
+                    <li>Merekam intelligence implementation, yang paling tidak berisi proses bisnis perangkat lunak,
+                        teknologi yang akan dipakai
+                        dalam setiap proses, dan identifikasi proses yang akan menjadikan keseluruhan sistem yang
+                        dibangun menjadi cerdas.</li>
+                    <li>Merekam hal hal yang membatasi pengembangan modul Perangkat Lunak dan perekaman status
+                        realisasi modul
+                        Perangkat Lunak yang dikerjakan di aplikasi pengembangan modul Perangkat Lunak.</li>
+                    <li>Merekam perencanaan implementasi perangkat lunak, yang paling tidak menetapkan pelaksanaan
+                        deployment,
+                        pemeliharaan perangkat lunak, pelaksana operasi perangkat lunak.</li>
+                </ol>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Charts 1 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartElement = document.getElementById('statusChart1');
+            if (!chartElement) {
+                console.error('Chart element not found');
+                return;
+            }
+
+            try {
+                const ctx = chartElement.getContext('2d');
+
+                // Ensure the data is properly formatted
+                const chartLabels = JSON.parse('{{ chart_labels|escapejs }}');
+                const chartCounts = JSON.parse('{{ chart_counts|escapejs }}');
+
+                // Validate data
+                if (!Array.isArray(chartLabels) || !Array.isArray(chartCounts)) {
+                    console.error('Invalid chart data format');
+                    return;
+                }
+
+                const statusChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Jumlah Projek',
+                            data: chartCounts,
+                            backgroundColor: ['#f39c12', '#2ecc71', '#e74c3c'],
+                            borderColor: ['#e67e22', '#27ae60', '#c0392b'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Jumlah Projek'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing chart:', error);
+            }
+        });
+    </script>
+
+    <!-- Charts 2 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartElement2 = document.getElementById('statusChart2');
+            if (!chartElement2) return;
+
+            try {
+                const labels2 = JSON.parse(chartElement2.dataset.labels);
+                const counts2 = JSON.parse(chartElement2.dataset.counts);
+
+                const ctx2 = chartElement2.getContext('2d');
+
+                new Chart(ctx2, {
+                    type: 'bar', // you can change this to 'bar' or 'pie' if preferred
+                    data: {
+                        labels: labels2,
+                        datasets: [{
+                            label: 'Jumlah Projek per Bulan',
+                            data: counts2,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Jumlah Projek'
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error('Chart 2 rendering error:', err);
+            }
+        });
+
+    </script>
+
+</div>
+{% endblock %}

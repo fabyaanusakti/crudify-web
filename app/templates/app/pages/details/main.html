@@ -1,0 +1,86 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %} CRUDify {% endblock %}
+{% block content %}
+<div class="p-4 rounded-2 shadow-sm border-2" style="width: 1080px;">
+  <div class="d-flex justify-content-end mb-3 gap-2">
+    <a href="{% url 'download_pdf' project.id %}" 
+    class="btn btn-primary btn-sm" style="background-color: #3d5a71; color: white">
+      <i class="fa-regular fa-file-pdf"></i> Unduh PDF
+    </a>
+    <button onclick="window.print()" 
+    class="btn btn-primary btn-sm" style="background-color: #3d5a71; color: white">
+      <i class="fa-solid fa-print"></i> Cetak  
+    </button>
+  </div>
+
+  <div class="printable-content">
+    <h2 class="text-center fw-bold mb-3 fs-4">{{ project.nama_projek }}</h2>
+    <div class="container pt-5" style="padding-top: 48px;">
+      <h3>Meaningful Objective</h3>
+      {% if objective %}
+      <ul>
+        <li><strong>Organization Objective: </strong>{{ objective.organizational }}</li>
+        <li><strong>Leading Indicator: </strong>{{ objective.leading_indicators }}</li>
+        <li><strong>User Outcomes: </strong>{{ objective.user_outcomes }}</li>
+        <li><strong>Model Properties: </strong>{{ objective.model_properties }}</li>
+      </ul>
+      {% else %}
+      <tr>
+        <td colspan="4">Data tidak tersedia.</td>
+      </tr>
+      {% endif %}
+
+      <h3>Intelligence Experience</h3>
+      {% if experience %}
+      <ul>
+        <li><strong>Automate:</strong> {{ experience.automate }}</li>
+        <li><strong>Prompt:</strong> {{ experience.prompt }}</li>
+        <li><strong>Annotate:</strong> {{ experience.annotate }}</li>
+        <li><strong>Organization:</strong> {{ experience.organization }}</li>
+        <li><strong>System Objectives:</strong> {{ experience.system_objectives }}</li>
+        <li><strong>Minimize Flaws:</strong> {{ experience.minimize_flaws }}</li>
+        <li><strong>Create Data:</strong> {{ experience.create_data }}</li>
+      </ul>
+      {% else %}
+      <p>Data tidak tersedia.</p>
+      {% endif %}
+
+      <h3>Intelligence Implementation</h3>
+      {% if implementation %}
+      <ul>
+        <li><strong>Business Process:</strong> {{ implementation.business_process }}</li>
+        <li><strong>Technology:</strong> {{ implementation.technology }}</li>
+        <li><strong>Build Process:</strong> {{ implementation.build_process }}</li>
+      </ul>
+      {% else %}
+      <p>Data tidak tersedia.</p>
+      {% endif %}
+
+      <h3>Batasan Pengembangan</h3>
+      {% if limitation %}
+      <p>{{ limitation.limitation }}</p>
+      {% else %}
+      <p>Data tidak tersedia.</p>
+      {% endif %}
+
+      <h3>Status Realisasi</h3>
+      {% if realization %}
+      <p>{{ realization.realization }}</p>
+      {% else %}
+      <p>Data tidak tersedia.</p>
+      {% endif %}
+
+      <h3>Perencanaan</h3>
+      {% if planning %}
+      <ul>
+        <li><strong>Deployment:</strong> {{ planning.deployment }}</li>
+        <li><strong>Maintenance:</strong> {{ planning.maintenance }}</li>
+        <li><strong>Operating System:</strong> {{ planning.operating }}</li>
+      </ul>
+      {% else %}
+      <p>Data tidak tersedia.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endblock %}
