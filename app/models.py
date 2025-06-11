@@ -17,9 +17,56 @@ class CustomUserProfileModels(AbstractUser):
         return self.username
 # ---- End of User Profile Models ---- #
 
+# ---- Start of Api Endpoint Models ---- #
+class AppConfig(models.Model):
+    projek_api_endpoint = models.URLField(
+        default='https://faizbyaan.pythonanywhere.com/api/projek/'
+    )
+    meaningful_data_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/meaningful-data/'
+    )
+    meaningful_objectives_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/meaningful_objectives-only/'
+    )
+    intelligence_experience_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/intelligence_experience-only/'
+    )
+    intelligence_implementation_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/intelligence_implementation-only/'
+    )
+    limitation_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/batasan_pengembangan-only/'
+    )
+    realization_status_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/status_realisasi-only/'
+    )
+    planning_endpoint = models.URLField(
+        default='fabyaanusakti.pythonanywhere.com/api/perencanaan-only/'
+    )
+
+    class Meta:
+        verbose_name = 'Application Configuration'
+        verbose_name_plural = 'Application Configurations'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+# ---- End of Api Endpoint Models ---- #
+
 # ---- Start of Project Model Models ---- #
 class ProjekModel(models.Model):
     """Model representing a project"""
+
+    STATUS_PROJEK = [
+        ('berlangsung', 'Berlangsung'),
+        ('selesai', 'Selesai'),
+        ('gagal', 'Gagal'),
+    ]
     
     id_projek = models.IntegerField(unique=True)
     nama_projek = models.CharField(max_length=255)
@@ -28,13 +75,8 @@ class ProjekModel(models.Model):
     tanggal_mulai = models.DateField()
     tanggal_selesai = models.DateField()
     supervisor = models.CharField(max_length=255, blank=True)
-    status_projek = models.CharField(max_length=20)
-    last_updated = models.DateTimeField(auto_now=True)
-    last_updated_source = models.CharField(
-        max_length=10,
-        choices=[('API_PUSH', 'Push'), ('API_PULL', 'Pull')],
-        default='API_PULL'
-    )
+    status_projek = models.CharField(choices=STATUS_PROJEK, max_length=20)
+
 
     class Meta:
         verbose_name = "Project"
@@ -58,8 +100,6 @@ class ObjectiveModels(models.Model):
     leading_indicators = models.TextField(verbose_name='Leading Indicators')
     user_outcomes = models.TextField(verbose_name='User Outcomes')
     model_properties = models.TextField(verbose_name='Model Properties')
-    date_start = models.DateField(null=True, blank=True, verbose_name='Tanggal Mulai')
-    date_end = models.DateField(null=True, blank=True, verbose_name='Tanggal Selesai')
 
     class Meta:
         verbose_name = "Meaningful Objective"

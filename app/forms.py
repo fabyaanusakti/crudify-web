@@ -108,57 +108,47 @@ class CustomUserProfileEditForm(UserChangeForm):
         }
 # ---- End of  user Login & Register ---- #
 
+# ---- Start of Api Endpoint Form ---- #
+class AppConfigForm(forms.ModelForm):
+    class Meta:
+        model = AppConfig
+        fields = '__all__'
+        labels = {
+            'projek_api_endpoint': 'API Projek',
+            'meaningful_data_endpoint': 'API Meaningful Data',
+            'meaningful_objectives_endpoint': 'API Meaningful Objectives',
+            'intelligence_experience_endpoint': 'API Intelligence Experience',
+            'intelligence_implementation_endpoint': 'API Intelligence Implementation',
+            'limitation_endpoint': 'API Batasan Pengembangan',
+            'realization_status_endpoint': 'API Status Realisasi',
+            'planning_endpoint': 'API Perencanaan',
+        }
+        widgets = {
+            field: forms.URLInput(attrs={
+                'class': 'form-control rounded-2 shadow-sm border-1 mb-3',
+                'placeholder': f'Masukan Alamat {label}'
+            }) for field, label in labels.items()
+        }
+
+# ---- End of Api Endpoint Form ---- #
+
 # ---- Start of Meaningfull Objectives Form ---- #
 class ObjectivesForm(forms.ModelForm):
     class Meta:
         model = ObjectiveModels
-        fields = {
-            'organizational', 
-            'leading_indicators', 
-            'user_outcomes', 
-            'model_properties',
-            'date_start',
-            'date_end'
-        }
-        
+        fields = '__all__'
         labels = {
             'organizational': 'Organizational Objectives',
             'leading_indicators': 'Leading Indicators',
             'user_outcomes': 'User Outcomes',
             'model_properties': 'Model Properties',
-            'date_start': 'Tanggal Mulai',
-            'date_end': 'Tanggal Selesai'
         }
 
         widgets = {
-            'organizational': forms.Textarea(attrs={
+            field: forms.Textarea(attrs={
                 'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan Organizational Objectives',
-                'rows': 3
-            }),
-            'leading_indicators': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan Leading Indicators',
-                'rows': 3
-            }),
-            'user_outcomes': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan User Outcomes',
-                'rows': 3
-            }),
-            'model_properties': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan Model Properties',
-                'rows': 3
-            }),
-            'date_start': forms.DateInput(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'type': 'date'
-            }),
-            'date_end': forms.DateInput(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'type': 'date'
-            })
+                'placeholder': f'Masukan {label}'
+            }) for field, label in labels.items()
         }
 # ---- End of Meaningfull Objectives Form ---- #
 
@@ -166,16 +156,7 @@ class ObjectivesForm(forms.ModelForm):
 class ExperienceForm(forms.ModelForm):
     class Meta:
         model = ExperienceModels
-        fields = {
-            'automate',
-            'prompt',
-            'annotate',
-            'organization',
-            'system_objectives',
-            'minimize_flaws',
-            'create_data'
-        }
-
+        fields = '__all__'
         labels = {
             'automate': 'Automate',
             'prompt': 'Prompt',
@@ -187,42 +168,10 @@ class ExperienceForm(forms.ModelForm):
         }
 
         widgets = {
-            'automate': forms.Textarea(attrs={
+            field: forms.Textarea(attrs={
                 'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan automate',
-                'rows': 3
-            }),
-            'prompt': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan prompt',
-                'rows': 3
-            }),
-            'annotate': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan annotate',
-                'rows': 3
-
-            }),
-            'organization': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan organization',
-                'rows': 3
-            }),
-            'system_objectives': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan system objectives',
-                'rows': 3
-            }),
-            'minimize_flaws': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan minimize intelligence flaws',
-                'rows': 3 
-            }),
-            'create_data': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan data',
-                'rows': 3
-            })
+                'placeholder': f'Masukan {label}'
+            }) for field, label in labels.items()
         }
 # ---- End of Intelligence Experience Form ---- #
 
@@ -230,12 +179,7 @@ class ExperienceForm(forms.ModelForm):
 class ImplementationForm(forms.ModelForm):
     class Meta:
         model = ImplementationModels
-        fields = {
-            'business_process',
-            'technology',
-            'build_process'
-        }
-
+        fields = '__all__'
         labels = {
             'business_process': 'Proses bisnis sistem cerdas',
             'technology': 'Teknologi yang akan digunakan',
@@ -243,20 +187,10 @@ class ImplementationForm(forms.ModelForm):
         }
 
         widgets = {
-            'business_process': forms.Textarea(attrs={
+            field: forms.Textarea(attrs={
                 'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder':  'Masukan proses bisnis sistem cerdas',
-                'rows': 3
-            }),
-            'technology': forms.Textarea(attrs={
-                'class': 'form-control rounded=2 shadow-sm border-1',
-                'placeholder': 'Masukan teknologi yang akan digunakan',
-                'rows': 3
-            }),
-            'build_process': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan proses yang akan dibangun'
-            })
+                'placeholder': f'Masukan {label}'
+            }) for field, label in labels.items()
         }
 # ---- End of Intelligence Implementation Form ---- #
 
@@ -264,9 +198,7 @@ class ImplementationForm(forms.ModelForm):
 class LimitationForm(forms.ModelForm):
     class Meta:
         model = LimitationModels
-        fields = {
-            'limitation'
-        }
+        fields = '__all__'
 
         labels = {
             'limitation': 'Batasan Pengembangan'
@@ -285,9 +217,7 @@ class LimitationForm(forms.ModelForm):
 class RealizationForm(forms.ModelForm):
     class Meta:
         model = RealizationModels
-        fields = {
-            'realization'
-        }
+        fields = '__all__'
 
         labels = {
             'realization': 'Status Realisasi'
@@ -306,12 +236,7 @@ class RealizationForm(forms.ModelForm):
 class PlanningForm(forms.ModelForm):
     class Meta:
         model = PlanningModels
-        fields = {
-            'deployment',
-            'maintenance',
-            'operating'
-        }
-
+        fields = '__all__'
         labels = {
             'deployment': 'Pelaksanaan Deployment',
             'maintenance': 'Pemeliharaan Sistem',
@@ -319,30 +244,9 @@ class PlanningForm(forms.ModelForm):
         }
 
         widgets = {
-            'deployment': forms.Textarea(attrs={
+            field: forms.Textarea(attrs={
                 'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan pelaksanaan deployment',
-                'rows': 3
-            }),
-            'maintenance': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan pemeliharaan sistem',
-                'rows': 3
-            }),
-            'operating': forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': 'Masukan pelaksanaan sistem operasi',
-                'rows': 3
-            })
+                'placeholder': f'Masukan {label}'
+            }) for field, label in labels.items()
         }
 # ---- End of Planning Form ---- #
-
-# ---- Start of Image Upload Form ---- #
-# class UploadLogoForm(forms.ModelForm):
-#     class Meta:
-#         model = UploadLogo
-#         fields = {
-#             'logo'
-#         }
-
-# ---- End of Image Upload Form ---- #

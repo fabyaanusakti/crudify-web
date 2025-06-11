@@ -43,8 +43,6 @@ def home(request):
     }
 
     return render(request, 'app/home.html', context)
-
-
 # ---- End of Homepage Views Controller ---- #
 
 # ---- Start of Users Views Controller ---- #
@@ -96,6 +94,24 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 # ---- End of Users Views Controller ---- #
+
+# ---- Start of Api Setting Controller ---- #
+@login_required
+def settings_view(request):
+    config = AppConfig.load()
+    
+    if request.method == 'POST':
+        form = AppConfigForm(request.POST, instance=config)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Berhasil Diperbarui!')
+            return redirect('settings')
+    else:
+        form = AppConfigForm(instance=config)
+    
+    return render(request, 'app/settings.html', {'form': form})
+
+# ---- End of Api Setting Controller ---- #
 
 # ---- Start of Projek Views Controller ---- #
 @login_required

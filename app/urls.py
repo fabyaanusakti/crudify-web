@@ -48,6 +48,10 @@ urlpatterns = [
     path('detail/projek=<int:pk>/', detail_projek_view, name='detail_projek'),
     path('detail/projek=<int:pk>/unduh/', download_pdf, name='download_pdf'),
     # ---- End of Details Page Address ---- #
+
+    # ---- Start of Setting Page Address ---- #
+    path('settings/', settings_view, name='settings'),
+    # ---- End of Setting Page Address ---- #
 ]
 
 if settings.DEBUG:

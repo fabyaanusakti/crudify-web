@@ -6,7 +6,7 @@ from app.api.utils.parse import parse_date
 
 def sync_projects(*, delete_stale=True, force=False):
     """
-    Enhanced version with better error handling and null checks
+    Simplified version without audit tracking fields
     """
     try:
         # Fetch and validate data
@@ -34,16 +34,9 @@ def sync_projects(*, delete_stale=True, force=False):
                 print(f"Skipping item with null ID: {item}")
                 continue
 
-            # Convert ID to string if needed (avoid integer/string mismatch)
+            # Convert ID to string if needed
             project_id = str(project_id)
             remote_ids.add(project_id)
-
-            # Skip if recently updated via push (unless forced)
-            existing = ProjekModel.objects.filter(id_projek=project_id).first()
-            if existing and not force:
-                if existing.last_updated_source == 'API_PUSH' and \
-                   (timezone.now() - existing.updated_at) < timedelta(hours=1):
-                    continue
 
             # Validate required fields with type checking
             required_fields = {
@@ -77,7 +70,6 @@ def sync_projects(*, delete_stale=True, force=False):
                         'tanggal_selesai': parse_date(item['tanggal_selesai']),
                         'supervisor': item.get('supervisor', ''),
                         'status_projek': item['status_projek'],
-                        'last_updated_source': 'API_PULL',
                     }
                 )
                 
