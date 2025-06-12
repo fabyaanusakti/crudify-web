@@ -26,6 +26,7 @@ from django.db.models import Count
 import json
 
 def home(request):
+    sync_projects()
     chart_labels = ['berlangsung', 'selesai', 'gagal']
     chart_counts = [0, 0, 0]
 

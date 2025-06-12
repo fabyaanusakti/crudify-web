@@ -129,7 +129,6 @@ class AppConfigForm(forms.ModelForm):
                 'placeholder': f'Masukan Alamat {label}'
             }) for field, label in labels.items()
         }
-
 # ---- End of Api Endpoint Form ---- #
 
 # ---- Start of Meaningfull Objectives Form ---- #
@@ -137,6 +136,7 @@ class ObjectivesForm(forms.ModelForm):
     class Meta:
         model = ObjectiveModels
         fields = '__all__'
+        exclude = ['project'] 
         labels = {
             'organizational': 'Organizational Objectives',
             'leading_indicators': 'Leading Indicators',
@@ -157,6 +157,7 @@ class ExperienceForm(forms.ModelForm):
     class Meta:
         model = ExperienceModels
         fields = '__all__'
+        exclude = ['project'] 
         labels = {
             'automate': 'Automate',
             'prompt': 'Prompt',
@@ -180,6 +181,7 @@ class ImplementationForm(forms.ModelForm):
     class Meta:
         model = ImplementationModels
         fields = '__all__'
+        exclude = ['project'] 
         labels = {
             'business_process': 'Proses bisnis sistem cerdas',
             'technology': 'Teknologi yang akan digunakan',
@@ -199,7 +201,7 @@ class LimitationForm(forms.ModelForm):
     class Meta:
         model = LimitationModels
         fields = '__all__'
-
+        exclude = ['project'] 
         labels = {
             'limitation': 'Batasan Pengembangan'
         }
@@ -218,7 +220,7 @@ class RealizationForm(forms.ModelForm):
     class Meta:
         model = RealizationModels
         fields = '__all__'
-
+        exclude = ['project'] 
         labels = {
             'realization': 'Status Realisasi'
         }
@@ -237,6 +239,7 @@ class PlanningForm(forms.ModelForm):
     class Meta:
         model = PlanningModels
         fields = '__all__'
+        exclude = ['project'] 
         labels = {
             'deployment': 'Pelaksanaan Deployment',
             'maintenance': 'Pemeliharaan Sistem',

@@ -108,7 +108,7 @@ class MeaningfulOnlySerializer(serializers.Serializer):
 class IntelligenceExperienceOnlySerializer(serializers.Serializer):
     id_proyek = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
-    intelligence_experinece = serializers.SerializerMethodField()
+    intelligence_experience = serializers.SerializerMethodField()
     def get_intelligence_experience(self, obj):
         if hasattr(obj, 'experience'):
             return ExperienceSerializer(obj.expeience).data

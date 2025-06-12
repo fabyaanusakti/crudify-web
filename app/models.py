@@ -1,4 +1,5 @@
 from django.db import models
+from urllib.parse import urljoin
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
@@ -22,26 +23,27 @@ class AppConfig(models.Model):
     projek_api_endpoint = models.URLField(
         default='https://faizbyaan.pythonanywhere.com/api/projek/'
     )
+    # 
     meaningful_data_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/meaningful-data/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/meaningful-data/'
     )
     meaningful_objectives_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/meaningful_objectives-only/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/meaningful_objectives-only/'
     )
     intelligence_experience_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/intelligence_experience-only/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/intelligence_experience-only/'
     )
     intelligence_implementation_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/intelligence_implementation-only/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/intelligence_implementation-only/'
     )
     limitation_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/batasan_pengembangan-only/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/batasan_pengembangan-only/'
     )
     realization_status_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/status_realisasi-only/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/status_realisasi-only/'
     )
     planning_endpoint = models.URLField(
-        default='fabyaanusakti.pythonanywhere.com/api/perencanaan-only/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/perencanaan-only/'
     )
 
     class Meta:
