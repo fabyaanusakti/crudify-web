@@ -1,16 +1,12 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 {% load custom_filters %}
-
-{% block title %} CRUDify {% endblock %}
-
+{% block title %}Profile{% endblock %}
 {% block content %}
-
 <div class="p-4 rounded-2 shadow-sm border-2" style="width: 550px;">
     <h2 class="text-center fw-bold mb-3 fs-4">Profile</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-
         {% for field in form %}
         <div class="mb-3">
             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -25,7 +21,8 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-body">
-                            <button type="button" class="btn btn-primary mb-3" style="background-color: #3d5a71; color: white" 
+                            <button type="button" class="btn btn-primary mb-3"
+                                style="background-color: #3d5a71; color: white"
                                 data-bs-toggle="modal"
                                 data-bs-target="#cameraModal">
                                 <i class="fa-solid fa-camera"></i> Buka Kamera
@@ -33,7 +30,7 @@
                             <div class="ratio ratio-4x3">
                                 <img id="photo"
                                     src="{% if user.picture %}{{ user.picture.url }}{% else %}{% static 'images/default.png' %}{% endif %}"
-                                    alt="Your profile picture" class="rounded">
+                                    alt="Your profile picture" class="rounded w-100 h-100 object-fit-cover">
                             </div>
                             <div id="filename-display" class="text-center small text-muted mb-2">
                                 {% if user.picture %}{{ user.picture.name|basename }}{% else %}No image selected{% endif %}
@@ -48,8 +45,7 @@
         <button type="submit" class="form-submit btn btn-login w-100"
             style="background-color: #3d5a71; color: white">Simpan</button>
     </form>
-
-    <!-- JavaScript -->
-    <script src="{% static 'js/webcam.js' %}"></script>
 </div>
+<!-- Camera JavaScript -->
+<script src="{% static 'js/webcam.js' %}"></script>
 {% endblock %}

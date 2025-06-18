@@ -21,11 +21,11 @@ class CustomUserProfileModels(AbstractUser):
 # ---- Start of Api Endpoint Models ---- #
 class AppConfig(models.Model):
     projek_api_endpoint = models.URLField(
-        default='https://faizbyaan.pythonanywhere.com/api/projek/'
+        default='https://michaelbriant.pythonanywhere.com/api/proyek/'
     )
     # 
     meaningful_data_endpoint = models.URLField(
-        default='https://fabyaanusakti.pythonanywhere.com/api/meaningful-data/'
+        default='http://127.0.0.1:8000/api/projek-data/'
     )
     meaningful_objectives_endpoint = models.URLField(
         default='https://fabyaanusakti.pythonanywhere.com/api/meaningful_objectives-only/'
@@ -45,6 +45,10 @@ class AppConfig(models.Model):
     planning_endpoint = models.URLField(
         default='https://fabyaanusakti.pythonanywhere.com/api/perencanaan-only/'
     )
+    status_endpoint = models.URLField(
+        default='https://fabyaanusakti.pythonanywhere.com/api/status-only/'
+    )
+    
 
     class Meta:
         verbose_name = 'Application Configuration'
@@ -62,8 +66,6 @@ class AppConfig(models.Model):
 
 # ---- Start of Project Model Models ---- #
 class ProjekModel(models.Model):
-    """Model representing a project"""
-
     STATUS_PROJEK = [
         ('berlangsung', 'Berlangsung'),
         ('selesai', 'Selesai'),
@@ -76,9 +78,8 @@ class ProjekModel(models.Model):
     lokasi = models.CharField(max_length=255, blank=True)
     tanggal_mulai = models.DateField()
     tanggal_selesai = models.DateField()
-    supervisor = models.CharField(max_length=255, blank=True)
-    status_projek = models.CharField(choices=STATUS_PROJEK, max_length=20)
-
+    supervisor_proyek = models.CharField(max_length=255, blank=True)
+    status_projek = models.CharField(choices=STATUS_PROJEK, max_length=20, default="berlangsung")
 
     class Meta:
         verbose_name = "Project"
@@ -87,6 +88,7 @@ class ProjekModel(models.Model):
 
     def __str__(self):
         return self.nama_projek
+
 # ---- End of Project Model Models ---- #
 
 # ---- Start of Meaningful Objectives Models ---- #

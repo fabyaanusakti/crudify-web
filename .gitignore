@@ -1,1 +1,3 @@
 venv/
+app/templates/temps.html
+app/templates/temps.txt

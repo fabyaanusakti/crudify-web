@@ -56,7 +56,6 @@ def register_view(request):
             return redirect('home')
     else:
         form = CustomRegisterForm()
-    
     return render(request, 'users/register.html', {'form': form})
 
 def login_view(request):
@@ -66,9 +65,12 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             return redirect('home')
+        else:
+            print(form.errors)
     else:
         form = CustomLoginForm()
     return render(request, 'users/login.html', {'form': form})
+
 
 @login_required
 def profile_view(request):
@@ -119,11 +121,42 @@ def settings_view(request):
 def projek_view(request):
     sync_projects()
     projects = ProjekModel.objects.all()
-    selected_project = projects.first() if projects.exists() else None #required
     return render(request, 'app/pages/projek/main.html', {
         'projects': projects,
-        'project': selected_project
+        'status_choices': ProjekModel.STATUS_PROJEK,
+        'project': projects.first() if projects.exists() else None
     })
+
+@require_POST
+def update_project_status(request, pk):
+    try:
+        # Get the new status from POST data
+        new_status = request.POST.get('status')
+        
+        if not new_status:
+            messages.error(request, 'Status is required')
+            return redirect('projek')
+
+        if new_status not in dict(ProjekModel.STATUS_PROJEK):
+            messages.error(request, 'Invalid status')
+            return redirect('projek')
+
+        try:
+            projek = ProjekModel.objects.get(pk=pk)
+        except ProjekModel.DoesNotExist:
+            messages.error(request, 'Project not found')
+            return redirect('projek')
+
+        projek.status_projek = new_status
+        projek.save()
+        
+        messages.success(request, 'Status updated successfully')
+        return redirect('projek')
+
+    except Exception as e:
+        messages.error(request, f'Error: {str(e)}')
+        return redirect('projek')
+
 
 @csrf_exempt
 @require_POST

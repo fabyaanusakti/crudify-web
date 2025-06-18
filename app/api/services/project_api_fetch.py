@@ -5,7 +5,7 @@ def fetch():
     try:
         config = AppConfig.load()
         if not hasattr(config, 'projek_api_endpoint'):
-            default_endpoint = 'https://faizbyaan.pythonanywhere.com/api/projek/'
+            default_endpoint = 'https://michaelbriant.pythonanywhere.com/api/proyek/'
             print(f"Warning: api_endpoint not found in AppConfig, using default: {default_endpoint}")
             response = requests.get(default_endpoint)
         else:

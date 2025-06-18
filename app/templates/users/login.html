@@ -1,46 +1,73 @@
-{% extends 'layout/base.html' %}
-
-{% block title %} CRUDify | Login {% endblock %}
-
+{% extends 'layout/base.html' %} 
+{% load form_tags %} 
+{% block title %} CRUDify | Login {% endblock %} 
 {% block content %}
-<div class="p-4 rounded-2 shadow-sm border-2" style="width: 450px;">
-     <h2 class="text-center fw-bold mb-3 fs-4">Selamat Datang kembali!</h2>
+<div class="p-4 rounded-2 shadow-sm border-2" style="width: 450px">
+  <h2 class="text-center fw-bold mb-3 fs-4">Selamat Datang kembali!</h2>
 
-    <form method="post">
-        {% csrf_token %}
-
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            {% for field in form %}
-            {% for error in field.errors %}
-            <p>{{ error }}</p>
-            {% endfor %}
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="mb-3 position-relative">
-            <div class="input-group">
-                {{ form.username }}
-            </div>
-
-        </div>
-
-        <div class="mb-3 position-relative">
-            <div class="input-group">
-                {{ form.password }}
-            </div>
-        </div>
-
-        <div class="mb-3 text-end">
-            <a href="#" class="text-decoration-none text-primary">Lupa Kata Sandi?</a>
-        </div>
-
-        <button type="submit" class="form-submit btn btn-login w-100"
-            style="background-color: #3d5a71; color: white">Masuk</button>
-    </form>
-    <div class="text-center mt-3">
-        Tidak punya akun? <a href="{% url 'register' %}" class="text-primary text-decoration-none">Daftar Sekarang!</a>
+  <form method="post">
+    {% csrf_token %} {% if form.errors %}
+    <div class="alert alert-danger">
+      {% for error in form.non_field_errors %}
+      <p>{{ error }}</p>
+      {% endfor %} {% for field in form %} {% for error in field.errors %}
+      <p>{{ error }}</p>
+      {% endfor %} {% endfor %}
     </div>
+    {% endif %}
+
+    <div class="mb-3 position-relative">
+      <div class="input-group">
+        {{ form.username|add_error_class:form.username.errors }}
+      </div>
+    </div>
+
+    <div class="mb-3 position-relative">
+      <div class="input-group">
+        {{ form.password }}
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          id="togglePassword"
+          tabindex="-1">
+          <i class="fa-solid fa-eye" id="toggleIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="mb-3 text-end">
+      <a href="#" class="text-decoration-none text-primary">Lupa Kata Sandi?</a>
+    </div>
+
+    <button
+      type="submit"
+      class="form-submit btn btn-login w-100"
+      style="background-color: #3d5a71; color: white"
+    >
+      Masuk
+    </button>
+  </form>
+
+  <div class="text-center mt-3">
+    Tidak punya akun?
+    <a href="{% url 'register' %}" class="text-primary text-decoration-none"
+      >Daftar Sekarang!</a
+    >
+  </div>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const passwordInput = document.getElementById("password");
+    const toggleBtn = document.getElementById("togglePassword");
+    const toggleIcon = document.getElementById("toggleIcon");
+
+    toggleBtn.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+
+      toggleIcon.classList.toggle("fa-eye");
+      toggleIcon.classList.toggle("fa-eye-slash");
+    });
+  });
+</script>
 {% endblock %}

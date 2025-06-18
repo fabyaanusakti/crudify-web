@@ -17,6 +17,7 @@ urlpatterns = [
 
     # ---- Start of Project Page Address ---- #
     path('projek/', projek_view, name='projek'),
+    path('update_status_projek/<int:pk>/', update_project_status, name='update_project_status'),
     path('projek/sync/', sync_projects_view, name='sync_projects'),
     # ---- End of Project Page Address ---- #
 

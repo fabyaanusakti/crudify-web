@@ -2,7 +2,11 @@ from django import forms
 from .models import *
 from .forms import *
 from django.contrib.auth.forms import *
+from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
+import re
 
 
 # ---- Start of User Login & Register ---- #
@@ -14,7 +18,7 @@ class CustomRegisterForm(UserCreationForm):
         label='Username',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Masukan Username'
+            'placeholder': 'Masukkan Username',
         }),
     )
 
@@ -23,7 +27,7 @@ class CustomRegisterForm(UserCreationForm):
         label='Email',
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Masukkan Email'
+            'placeholder': 'Masukkan Email',
         }),
     )
 
@@ -32,18 +36,56 @@ class CustomRegisterForm(UserCreationForm):
         label='Password',
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Masukan Password'
+            'placeholder': 'Masukkan Password',
+            'id': 'password1'
+        }),
+    )
+
+    password2 = forms.CharField(
+        required=True,
+        label='Konfirmasi Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ulangi Password',
+            'id': 'password2'
         }),
     )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('username', 'email', 'password1')
+        fields = ('username', 'email', 'password1', 'password2')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'password2' in self.fields:
-            del self.fields['password2']
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValidationError(_("Username sudah digunakan."))
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_("Email sudah digunakan."))
+        return email
+
+    def clean_password1(self):
+        password = self.cleaned_data.get('password1')
+        if len(password) < 8:
+            raise ValidationError(_("Password harus minimal 8 karakter."))
+        # if not re.search(r'[A-Z]', password):
+        #     raise ValidationError(_("Password harus mengandung huruf kapital."))
+        # if not re.search(r'[a-z]', password):
+        #     raise ValidationError(_("Password harus mengandung huruf kecil."))
+        # if not re.search(r'[0-9]', password):
+        #     raise ValidationError(_("Password harus mengandung angka."))
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise ValidationError(_("Password dan konfirmasi tidak cocok."))
+        return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -59,7 +101,7 @@ class CustomLoginForm(AuthenticationForm):
         widget=forms.TextInput(attrs={
             'name': 'username',
             'type': 'text',
-            'class': 'form-control', 
+            'class': 'form-control',
             'placeholder': 'Masukkan Username',
             'autofocus': True,
         }),
@@ -71,11 +113,34 @@ class CustomLoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={
             'name': 'password',
             'type': 'password',
-            'class': 'form-control', 
+            'class': 'form-control',
             'placeholder': 'Masukkan Kata Sandi',
             'id': 'password',
         }),
     )
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if not username or not password:
+            raise forms.ValidationError(_("Semua kolom wajib diisi."))
+
+        # Check if the username exists
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise forms.ValidationError(_("Username tidak ditemukan."), code='username_not_found')
+
+        # If it exists, try authenticating
+        self.user_cache = authenticate(self.request, username=username, password=password)
+
+        if self.user_cache is None:
+            raise forms.ValidationError(_("Kata sandi salah."), code='wrong_password')
+
+        self.confirm_login_allowed(self.user_cache)
+        return self.cleaned_data
+
 
 class CustomUserProfileEditForm(UserChangeForm):
     password = None
@@ -122,6 +187,7 @@ class AppConfigForm(forms.ModelForm):
             'limitation_endpoint': 'API Batasan Pengembangan',
             'realization_status_endpoint': 'API Status Realisasi',
             'planning_endpoint': 'API Perencanaan',
+            'status_endpoint': 'API Status'
         }
         widgets = {
             field: forms.URLInput(attrs={

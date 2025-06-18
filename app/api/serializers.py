@@ -3,30 +3,29 @@ from app.models import *
 
 # --- Start of ProjekPushSerializer --- #
 class ProjekPushSerializer(serializers.Serializer):
-    id              = serializers.IntegerField()          
-    nama_projek     = serializers.CharField(max_length=255)
-    deskripsi       = serializers.CharField(allow_blank=True, required=False)
-    lokasi          = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    tanggal_mulai   = serializers.DateField()
+    id = serializers.IntegerField()
+    nama_proyek = serializers.CharField(max_length=255)
+    deskripsi_proyek = serializers.CharField(allow_blank=True, required=False)
+    lokasi = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    tanggal_mulai = serializers.DateField()
     tanggal_selesai = serializers.DateField()
-    supervisor      = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    status_projek   = serializers.ChoiceField(choices=[c[0] for c in ProjekModel.STATUS_PROJEK])
+    supervisor_proyek = serializers.CharField(max_length=255, allow_blank=True, required=False)
 
     def create_or_update(self):
         validated = self.validated_data
         obj, created = ProjekModel.objects.update_or_create(
             id_projek=validated['id'],
             defaults={
-                'nama_projek'    : validated['nama_projek'],
-                'deskripsi'      : validated.get('deskripsi', ''),
-                'lokasi'         : validated.get('lokasi', ''),
-                'tanggal_mulai'  : validated['tanggal_mulai'],
+                'nama_projek': validated['nama_proyek'],
+                'deskripsi': validated.get('deskripsi_proyek', ''),
+                'lokasi': validated.get('lokasi', ''),
+                'tanggal_mulai': validated['tanggal_mulai'],
                 'tanggal_selesai': validated['tanggal_selesai'],
-                'supervisor'     : validated.get('supervisor', ''),
-                'status_projek'  : validated['status_projek'],
+                'supervisor_proyek': validated.get('supervisor_proyek', ''),
             }
         )
         return obj, created
+
 # --- End of ProjekPushSerializer --- #
 
 
@@ -58,7 +57,7 @@ class PlanningSerializer(serializers.ModelSerializer):
 # --- End of Meaningful Data Serialization --- #   
 
 class MeaningfulDataSerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     meaningful_objectives = serializers.SerializerMethodField()
     intelligence_experience = serializers.SerializerMethodField()
@@ -95,7 +94,7 @@ class MeaningfulDataSerializer(serializers.Serializer):
 
 # --- Start of Meaningful only Serialization --- #
 class MeaningfulOnlySerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     meaningful_objectives = serializers.SerializerMethodField() 
     def get_meaningful_objectives(self, obj):
@@ -106,16 +105,16 @@ class MeaningfulOnlySerializer(serializers.Serializer):
 
 # --- Start of Intelligence Experience only Serialization --- #
 class IntelligenceExperienceOnlySerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     intelligence_experience = serializers.SerializerMethodField()
     def get_intelligence_experience(self, obj):
         if hasattr(obj, 'experience'):
-            return ExperienceSerializer(obj.expeience).data
+            return ExperienceSerializer(obj.experience).data
         return None 
 # --- End of Intelligence Experience only Serialization --- # 
 class IntelligenceImplementationOnlySerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     intelligence_implementation = serializers.SerializerMethodField()
     def get_intelligence_implementation(self, obj):
@@ -126,7 +125,7 @@ class IntelligenceImplementationOnlySerializer(serializers.Serializer):
 
 # --- Start of Limitation only Serialization --- # 
 class LimitationOnlySerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     batasan_pengembangan = serializers.SerializerMethodField()
     def get_batasan_pengembangan(self, obj):
@@ -137,7 +136,7 @@ class LimitationOnlySerializer(serializers.Serializer):
 
 # --- Start of Realization only Serialization --- #
 class RealizationOnlySerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     status_realisasi = serializers.SerializerMethodField()
     def get_status_realisasi(self, obj):
@@ -148,7 +147,7 @@ class RealizationOnlySerializer(serializers.Serializer):
 
 # --- Start of Planning only Serialization --- #
 class PlanningOnlySerializer(serializers.Serializer):
-    id_proyek = serializers.IntegerField(source='id_projek')
+    id = serializers.IntegerField(source='id_projek')
     nama_proyek = serializers.CharField(source='nama_projek')
     perencanaan = serializers.SerializerMethodField()
     def get_perencanaan(self, obj):
@@ -156,3 +155,10 @@ class PlanningOnlySerializer(serializers.Serializer):
             return PlanningSerializer(obj.planning).data
         return None
 # --- Start of Planning only Serialization --- #
+
+# --- Start of Status only Serialization --- #
+class StatusOnlySerializer(serializers.Serializer):
+    id = serializers.IntegerField(source='id_projek')
+    nama_proyek = serializers.CharField(source='nama_projek')
+    status = serializers.CharField(source='status_projek')
+# --- End of Status only Serialization --- #

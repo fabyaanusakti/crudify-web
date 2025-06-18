@@ -1,8 +1,6 @@
 {% extends 'layout/base.html' %} 
-{% load static %}
-{% block title %} 
-    CRUDify 
-{% endblock %} 
+{% load static %} 
+{% block title %} CRUDify {% endblock %} 
 {% block content %}
 <div
   class="p-4 rounded-2 shadow-sm border-2"
@@ -39,7 +37,6 @@
           <th class="d-none d-md-table-cell">Tanggal Mulai</th>
           <th class="d-none d-md-table-cell">Tanggal Selesai</th>
           <th class="d-none d-md-table-cell">Supervisor</th>
-          <th class="d-none d-md-table-cell">Status</th>
           <th>Aksi</th>
         </tr>
       </thead>
@@ -50,23 +47,31 @@
           <td class="d-none d-md-table-cell">{{ project.lokasi }}</td>
           <td class="d-none d-md-table-cell">{{ project.tanggal_mulai }}</td>
           <td class="d-none d-md-table-cell">{{ project.tanggal_selesai }}</td>
-          <td class="d-none d-md-table-cell">{{ project.supervisor }}</td>
-          <td class="d-none d-md-table-cell">{{ project.status_projek }}</td>
+          <td class="d-none d-md-table-cell">{{ project.supervisor_proyek }}</td>
+
           <td class="text-center">
             <a
               href="{% url 'detail_projek' project.pk %}"
               class="btn btn-sm btn-info mb-1"
-              style="background-color: #3d5a71; color: white"
-            >
+              style="background-color: #3d5a71; color: white">
               <i class="fa-regular fa-file-lines"></i> Details
             </a>
             <a
               href="{% url 'objectives_view' %}?project={{ project.pk }}"
               class="btn btn-sm btn-info"
-              style="background-color: #3d5a71; color: white"
-            >
+              style="background-color: #3d5a71; color: white">
               <i class="fa-solid fa-plus"></i> Tambah Data
             </a>
+            <button
+              class="btn btn-sm btn-warning"
+              data-bs-toggle="modal"
+              data-bs-target="#statusModal"
+              data-project-id="{{ project.pk }}"
+              data-project-name="{{ project.nama_projek }}"
+              data-current-status="{{ project.status_projek }}"
+              style="background-color: #3d5a71; color: white">
+              <i class="fa-solid fa-pen"></i> Status
+            </button>
           </td>
         </tr>
         {% empty %}
@@ -80,210 +85,5 @@
     </table>
   </div>
 </div>
-<script>
-  class ProjekTable {
-    constructor(tableContainerId) {
-      try {
-        this.container = document.getElementById(tableContainerId);
-        if (!this.container) {
-          throw new Error(`Container with ID ${tableContainerId} not found`);
-        }
-
-        // Core elements
-        this.searchInput = this.container.querySelector("#searchInput");
-        this.syncButton = this.container.querySelector("[data-sync-url]");
-        this.table = this.container.querySelector("table");
-        this.alertContainer = this.createAlertContainer();
-
-        // Validation
-        if (!this.searchInput || !this.syncButton || !this.table) {
-          throw new Error("Required elements not found in container");
-        }
-
-        // Initialize
-        this.initEvents();
-      } catch (error) {
-        console.error("Initialization error:", error);
-        this.showAlert("Failed to initialize project table", "danger");
-      }
-    }
-
-    initEvents() {
-      // Search input
-      this.searchInput.addEventListener("input", () => {
-        clearTimeout(this.searchTimeout);
-        this.searchTimeout = setTimeout(() => this.filterRows(), 300);
-      });
-
-      // Sync button with confirmation
-      this.syncButton.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (
-          confirm(
-            "Apakah Anda yakin ingin menyinkronkan data projek? Ini mungkin memakan waktu beberapa saat."
-          )
-        ) {
-          this.syncProjects();
-        }
-      });
-    }
-
-    filterRows() {
-      try {
-        const keyword = this.searchInput.value.trim().toLowerCase();
-        const rows = this.table.querySelectorAll("tbody tr");
-
-        let visibleRows = 0;
-
-        rows.forEach((row) => {
-          // Skip empty or colspan rows
-          if (row.querySelector("td[colspan]")) {
-            row.style.display = "none";
-            return;
-          }
-
-          const rowText = row.textContent.toLowerCase();
-          const shouldShow = keyword === "" || rowText.includes(keyword);
-          row.style.display = shouldShow ? "" : "none";
-
-          if (shouldShow) visibleRows++;
-        });
-
-        // Show message if no results
-        this.showNoResultsMessage(visibleRows === 0 && keyword !== "");
-      } catch (error) {
-        console.error("Filter error:", error);
-      }
-    }
-
-    async syncProjects() {
-      const button = this.syncButton;
-      const originalText = button.innerHTML;
-
-      try {
-        // UI feedback
-        button.disabled = true;
-        button.innerHTML = `
-          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-          Memproses...
-        `;
-
-        // Get CSRF token
-        const csrfToken = this.getCSRFToken();
-        if (!csrfToken) {
-          throw new Error("Token keamanan hilang. Silakan muat ulang halaman.");
-        }
-
-        // API call
-        const response = await fetch(button.dataset.syncUrl, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-          credentials: "same-origin",
-        });
-
-        // Handle response
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Sinkronisasi gagal dengan error tidak diketahui"
-          );
-        }
-
-        // Success feedback
-        this.showAlert(
-          `Sinkronisasi berhasil! ${data.created || 0} dibuat, ${
-            data.updated || 0
-          } diperbarui.`,
-          "success"
-        );
-
-        // Refresh after delay if needed
-        if (data.refresh_needed) {
-          setTimeout(() => location.reload(), 750);
-        }
-      } catch (error) {
-        console.error("Sync error:", error);
-        this.showAlert(error.message, "danger");
-      } finally {
-        // Restore button state
-        button.disabled = false;
-        button.innerHTML = originalText;
-      }
-    }
-
-    // Helper methods
-    getCSRFToken() {
-      try {
-        return (
-          document.querySelector("[name=csrfmiddlewaretoken]")?.value ||
-          document.cookie.match(/csrftoken=([^;]+)/)?.[1] ||
-          null
-        );
-      } catch (error) {
-        console.error("CSRF token error:", error);
-        return null;
-      }
-    }
-
-    createAlertContainer() {
-      const alertDiv = document.createElement("div");
-      alertDiv.className = "position-fixed top-0 end-0 p-3";
-      alertDiv.style.zIndex = "1100";
-      document.body.appendChild(alertDiv);
-      return alertDiv;
-    }
-
-    showAlert(message, type) {
-      const alert = document.createElement("div");
-      alert.className = `alert alert-${type} alert-dismissible fade show`;
-      alert.role = "alert";
-      alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      `;
-
-      this.alertContainer.innerHTML = "";
-      this.alertContainer.appendChild(alert);
-
-      // Auto-dismiss after 5 seconds
-      setTimeout(() => {
-        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-        bsAlert.close();
-      }, 5000);
-    }
-
-    showNoResultsMessage(show) {
-      let noResultsRow = this.table.querySelector(".no-results-row");
-
-      if (show && !noResultsRow) {
-        noResultsRow = document.createElement("tr");
-        noResultsRow.className = "no-results-row";
-        noResultsRow.innerHTML = `
-          <td colspan="${this.table.querySelectorAll("thead th").length}">
-            <div class="text-center py-3 text-muted">
-              Tidak ada projek yang cocok dengan pencarian Anda
-            </div>
-          </td>
-        `;
-        this.table.querySelector("tbody").appendChild(noResultsRow);
-      } else if (!show && noResultsRow) {
-        noResultsRow.remove();
-      }
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    try {
-      if (document.getElementById("projekTableContainer")) {
-        new ProjekTable("projekTableContainer");
-      }
-    } catch (error) {
-      console.error("Initialization failed:", error);
-    }
-  });
-</script>
+<script src="{% static 'js/projecttable.js' %}"></script>
 {% endblock %}
