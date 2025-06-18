@@ -25,7 +25,7 @@ class AppConfig(models.Model):
     )
     # 
     meaningful_data_endpoint = models.URLField(
-        default='http://127.0.0.1:8000/api/projek-data/'
+        default='https://fabyaanusakti.pythonanywhere.com/api/projek-data/'
     )
     meaningful_objectives_endpoint = models.URLField(
         default='https://fabyaanusakti.pythonanywhere.com/api/meaningful_objectives-only/'
