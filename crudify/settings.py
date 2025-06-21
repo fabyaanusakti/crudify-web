@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u!&uop+a@ep&1*znm2le#d3j&ahb7)n%x8j=^%%2hdim*7c71='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False #True of False
+DEBUG = True #True of False
 
-ALLOWED_HOSTS = ['fabyaanusakti.pythonanywhere.com'] # 
+ALLOWED_HOSTS = [] # 'fabyaanusakti.pythonanywhere.com'
 
 AUTH_USER_MODEL = 'app.CustomUserProfileModels'
 
@@ -42,7 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'app',
-    'rest_framework'
+    'rest_framework',
+    'django_extensions',
+    'corsheaders',
+    'widget_tweaks',
 ]
 
 REST_FRAMEWORK = {
@@ -51,6 +54,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -111,7 +115,8 @@ DATABASES = {
 # ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Default Django auth backend
+    'django.contrib.auth.backends.ModelBackend',
+    'app.backends.EmailOrUsernameModelBackend',
 ]
 
 
@@ -136,6 +141,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    "https://michaelbriant.pythonanywhere.com",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

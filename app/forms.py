@@ -1,12 +1,12 @@
 from django import forms
 from .models import *
 from .forms import *
+from django.db.models import Q
 from django.contrib.auth.forms import *
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
-import re
 
 
 # ---- Start of User Login & Register ---- #
@@ -95,14 +95,14 @@ class CustomRegisterForm(UserCreationForm):
             user.save()
         return user
     
-class CustomLoginForm(AuthenticationForm):
+class CustomLoginForm(forms.Form):
     username = forms.CharField(
-        label="Username",
+        label="Username atau Email",
         widget=forms.TextInput(attrs={
             'name': 'username',
             'type': 'text',
             'class': 'form-control',
-            'placeholder': 'Masukkan Username',
+            'placeholder': 'Masukkan Username atau Email',
             'autofocus': True,
         }),
         strip=False,
@@ -119,28 +119,70 @@ class CustomLoginForm(AuthenticationForm):
         }),
     )
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
-        username = self.cleaned_data.get('username')
+        username_or_email = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
 
-        if not username or not password:
+        if not username_or_email or not password:
             raise forms.ValidationError(_("Semua kolom wajib diisi."))
 
-        # Check if the username exists
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise forms.ValidationError(_("Username tidak ditemukan."), code='username_not_found')
+        # Check if user exists
+        user_qs = User.objects.filter(
+            Q(username__iexact=username_or_email) | Q(email__iexact=username_or_email)
+        )
+        if not user_qs.exists():
+            raise forms.ValidationError(_("Akun dengan username/email ini tidak ditemukan."))
 
-        # If it exists, try authenticating
-        self.user_cache = authenticate(self.request, username=username, password=password)
+        # Try authenticating with username first, then email
+        self.user_cache = authenticate(
+            self.request,
+            username=username_or_email,
+            password=password
+        )
+        
+        if self.user_cache is None:
+            # If username auth failed, try email auth
+            try:
+                user = User.objects.get(email__iexact=username_or_email)
+                self.user_cache = authenticate(
+                    self.request,
+                    username=user.username,
+                    password=password
+                )
+            except User.DoesNotExist:
+                pass
 
         if self.user_cache is None:
-            raise forms.ValidationError(_("Kata sandi salah."), code='wrong_password')
+            raise forms.ValidationError(_("Kata sandi salah."))
 
+        # Set the backend explicitly
+        self.user_cache.backend = 'django.contrib.auth.backends.ModelBackend'  # or your custom backend
+        
         self.confirm_login_allowed(self.user_cache)
         return self.cleaned_data
+    
+    def confirm_login_allowed(self, user):
+        """
+        Controls whether the given User may log in.
+        """
+        if not user.is_active:
+            raise forms.ValidationError(
+                _("Akun ini tidak aktif."),
+                code='inactive',
+            )
+        
+        if user.has_usable_password() is False:
+            raise forms.ValidationError(
+                _("Akun ini tidak dapat login menggunakan password."),
+                code='no_password',
+            )
 
+    def get_user(self):
+        return self.user_cache
 
 class CustomUserProfileEditForm(UserChangeForm):
     password = None

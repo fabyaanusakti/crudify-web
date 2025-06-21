@@ -22,8 +22,6 @@ import base64
 import json
 
 # ---- Start of Homepage Views Controller ---- #
-from django.db.models import Count
-import json
 
 def home(request):
     sync_projects()
@@ -52,6 +50,8 @@ def register_view(request):
         form = CustomRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Add the backend attribute before login
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
             return redirect('home')
     else:
@@ -60,13 +60,11 @@ def register_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = CustomLoginForm(data=request.POST)
+        form = CustomLoginForm(request=request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             return redirect('home')
-        else:
-            print(form.errors)
     else:
         form = CustomLoginForm()
     return render(request, 'users/login.html', {'form': form})

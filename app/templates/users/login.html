@@ -1,60 +1,74 @@
 {% extends 'layout/base.html' %} 
 {% load form_tags %} 
+{% load widget_tweaks %}
 {% block title %} CRUDify | Login {% endblock %} 
 {% block content %}
-<div class="p-4 rounded-2 shadow-sm border-2" style="width: 450px">
-  <h2 class="text-center fw-bold mb-3 fs-4">Selamat Datang kembali!</h2>
+<div class="p-4 rounded-2 shadow-sm border-2 mx-auto" style="width: 450px">
+  <h2 class="text-center fw-bold mb-3 fs-4">Selamat Datang Kembali!</h2>
 
-  <form method="post">
-    {% csrf_token %} {% if form.errors %}
-    <div class="alert alert-danger">
-      {% for error in form.non_field_errors %}
-      <p>{{ error }}</p>
-      {% endfor %} {% for field in form %} {% for error in field.errors %}
-      <p>{{ error }}</p>
-      {% endfor %} {% endfor %}
-    </div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {# Global non-field errors #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+          <p class="mb-0">{{ error }}</p>
+        {% endfor %}
+      </div>
     {% endif %}
 
-    <div class="mb-3 position-relative">
+    {# Username or Email Field #}
+    <div class="mb-3">
+      <label for="{{ form.username.id_for_label }}" class="form-label">Username atau Email</label>
       <div class="input-group">
-        {{ form.username|add_error_class:form.username.errors }}
+        <span class="input-group-text"><i class="fa fa-user"></i></span>
+        {{ form.username|add_class:"form-control"|attr:"autocomplete:username" }}
       </div>
+      {% if form.username.errors %}
+        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+      {% endif %}
     </div>
 
-    <div class="mb-3 position-relative">
+    {# Password Field #}
+    <div class="mb-3">
+      <label for="{{ form.password.id_for_label }}" class="form-label">Kata Sandi</label>
       <div class="input-group">
-        {{ form.password }}
-        <button
-          type="button"
-          class="btn btn-outline-secondary"
-          id="togglePassword"
-          tabindex="-1">
+        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+        {{ form.password|add_class:"form-control"|attr:"id:password"|attr:"autocomplete:current-password" }}
+        <button type="button" class="btn btn-outline-secondary" id="togglePassword" tabindex="-1">
           <i class="fa-solid fa-eye" id="toggleIcon"></i>
         </button>
       </div>
+      {% if form.password.errors %}
+        <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+      {% endif %}
     </div>
 
+    {# Forgot Password #}
     <div class="mb-3 text-end">
       <a href="#" class="text-decoration-none text-primary">Lupa Kata Sandi?</a>
     </div>
 
+    {# Submit Button with Spinner #}
     <button
       type="submit"
-      class="form-submit btn btn-login w-100"
+      class="form-submit btn btn-login w-100 d-flex align-items-center justify-content-center gap-2"
       style="background-color: #3d5a71; color: white"
-    >
-      Masuk
+      id="loginBtn">
+      <span>Masuk</span>
+      <div class="spinner-border spinner-border-sm d-none" role="status" id="loadingSpinner"></div>
     </button>
   </form>
 
+  {# Register Prompt #}
   <div class="text-center mt-3">
     Tidak punya akun?
-    <a href="{% url 'register' %}" class="text-primary text-decoration-none"
-      >Daftar Sekarang!</a
-    >
+    <a href="{% url 'register' %}" class="text-primary text-decoration-none">Daftar Sekarang!</a>
   </div>
 </div>
+
+{# Scripts for Password Toggle and Spinner #}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const passwordInput = document.getElementById("password");
@@ -64,9 +78,13 @@
     toggleBtn.addEventListener("click", function () {
       const isPassword = passwordInput.type === "password";
       passwordInput.type = isPassword ? "text" : "password";
-
       toggleIcon.classList.toggle("fa-eye");
       toggleIcon.classList.toggle("fa-eye-slash");
+    });
+
+    document.querySelector("form").addEventListener("submit", function () {
+      document.getElementById("loginBtn").disabled = true;
+      document.getElementById("loadingSpinner").classList.remove("d-none");
     });
   });
 </script>
