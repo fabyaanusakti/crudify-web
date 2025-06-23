@@ -1,5 +1,8 @@
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+
 
 # Create your models here.
 
@@ -103,6 +106,15 @@ class ObjectiveModels(models.Model):
     leading_indicators = models.TextField(verbose_name='Leading Indicators')
     user_outcomes = models.TextField(verbose_name='User Outcomes')
     model_properties = models.TextField(verbose_name='Model Properties')
+    
+    last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
+    last_edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Diedit Oleh"
+    )
 
     class Meta:
         verbose_name = "Meaningful Objective"
@@ -126,6 +138,15 @@ class ExperienceModels(models.Model):
     minimize_flaws = models.TextField(verbose_name='Minimize Intelligence Flaws')
     create_data = models.TextField(verbose_name='Create data to grow')
 
+    last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
+    last_edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Diedit Oleh"
+    )
+
     class Meta:
         verbose_name = "Intelligence Experience"
         verbose_name_plural = "Intelligence Experiences"
@@ -144,6 +165,15 @@ class ImplementationModels(models.Model):
     technology = models.TextField(verbose_name='Used Technology')
     build_process = models.TextField(verbose_name='Built Process')
 
+    last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
+    last_edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Diedit Oleh"
+    )
+
     class Meta:
         verbose_name = "Intelligence Implementation"
         verbose_name_plural = "Intelligence Implementations"
@@ -160,6 +190,15 @@ class LimitationModels(models.Model):
     
     limitation = models.TextField(verbose_name='Limitation')
 
+    last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
+    last_edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Diedit Oleh"
+    )
+
     class Meta:
         verbose_name = "Limitation"
         verbose_name_plural = "Limitations"
@@ -175,6 +214,15 @@ class RealizationModels(models.Model):
     )
 
     realization = models.TextField(verbose_name='Realization')
+
+    last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
+    last_edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Diedit Oleh"
+    )
 
     class Meta:
         verbose_name = 'Realization'
@@ -193,6 +241,15 @@ class PlanningModels(models.Model):
     deployment = models.TextField(verbose_name='Deployment')
     maintenance = models.TextField(verbose_name='Maintenance')
     operating = models.TextField(verbose_name='Operating System')
+
+    last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
+    last_edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Diedit Oleh"
+    )
 
     class Meta:
         verbose_name = 'Planning'

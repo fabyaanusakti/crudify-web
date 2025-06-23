@@ -191,3 +191,48 @@ nav ul li a span {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.last-edited-info {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #3d5a71;
+    margin-top: 15px;
+}
+
+.last-edited-info h6 {
+    margin-bottom: 12px;
+    color: #3d5a71;
+    font-size: 0.95rem;
+}
+
+.last-edited-info ul {
+    margin-bottom: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.last-edited-info ul li {
+    padding: 6px 0;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.last-edited-info ul li:last-child {
+    border-bottom: none;
+}
+
+.last-edited-info .badge {
+    font-size: 0.75rem;
+    padding: 4px 6px;
+    min-width: 100px;
+    text-align: center;
+}
+
+.last-edited-info .text-muted {
+    font-size: 0.85rem;
+    color: #6c757d !important;
+}

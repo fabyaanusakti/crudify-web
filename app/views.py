@@ -118,7 +118,26 @@ def settings_view(request):
 @login_required
 def projek_view(request):
     sync_projects()
-    projects = ProjekModel.objects.all()
+    projects = ProjekModel.objects.all().prefetch_related(
+        'objective',
+        'objective__last_edited_by',
+
+        'experience',
+        'experience__last_edited_by',
+
+        'implementation',
+        'implementation__last_edited_by',
+
+        'limitation',
+        'limitation__last_edited_by',
+
+        'realization',
+        'realization__last_edited_by',
+        
+        'planning',
+        'planning__last_edited_by',
+    )
+    
     return render(request, 'app/pages/projek/main.html', {
         'projects': projects,
         'status_choices': ProjekModel.STATUS_PROJEK,
@@ -198,7 +217,9 @@ def objectives_view(request):
         if request.method == 'POST':
             form = ObjectivesForm(request.POST, instance=objective)
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False) 
+                obj.last_edited_by = request.user
+                obj.save()
                 return redirect(f"{reverse('experience_view')}?project={project.id}")
         else:
             form = ObjectivesForm(instance=objective)
@@ -236,7 +257,9 @@ def experience_view(request):
         if request.method == 'POST':
             form = ExperienceForm(request.POST, instance=experience)
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False) 
+                obj.last_edited_by = request.user
+                obj.save()
                 return redirect(f"{reverse('implementation_view')}?project={project.id}")
         else:
             form = ExperienceForm(instance=experience)
@@ -274,7 +297,9 @@ def implementation_view(request):
         if request.method == 'POST':
             form = ImplementationForm(request.POST, instance=implementation)
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False) 
+                obj.last_edited_by = request.user
+                obj.save()
                 return redirect(f"{reverse('limitation_view')}?project={project.id}")
         else:
             form = ImplementationForm(instance=implementation)
@@ -312,7 +337,9 @@ def limitation_view(request):
         if request.method == 'POST':
             form = LimitationForm(request.POST, instance=limitation)
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False) 
+                obj.last_edited_by = request.user
+                obj.save()
                 return redirect(f"{reverse('realization_view')}?project={project.id}")
         else:
             form = LimitationForm(instance=limitation)
@@ -350,7 +377,9 @@ def realization_view(request):
         if request.method == 'POST':
             form = RealizationForm(request.POST, instance=realization)
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False) 
+                obj.last_edited_by = request.user
+                obj.save()
                 return redirect(f"{reverse('planning_view')}?project={project.id}")
         else:
             form = RealizationForm(instance=realization)
@@ -388,7 +417,9 @@ def planning_view(request):
         if request.method == 'POST':
             form = PlanningForm(request.POST, instance=planning)
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False) 
+                obj.last_edited_by = request.user
+                obj.save()
                 return redirect('detail_projek', pk=project.id)
         else:
             form = PlanningForm(instance=planning)

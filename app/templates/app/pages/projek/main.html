@@ -1,12 +1,9 @@
 {% extends 'layout/base.html' %} 
 {% load static %} 
-{% block title %} CRUDify {% endblock %} 
+{% load project_tags %} 
+{% block title %}CRUDify{% endblock %} 
 {% block content %}
-<div
-  class="p-4 rounded-2 shadow-sm border-2"
-  style="width: auto"
-  id="projekTableContainer"
->
+<div class="p-4 rounded-2 shadow-sm border-2" id="projekTableContainer">
   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
   <h2 class="text-center fw-bold mb-3 fs-4">Projek</h2>
 
@@ -18,13 +15,12 @@
       placeholder="Cari disini..."
       style="border-radius: 5px"
     />
-
     <button
       class="btn btn-sm btn-primary"
       style="background-color: #3d5a71; color: white"
       data-sync-url="{% url 'sync_projects' %}"
     >
-      <i class="fas fa-sync-alt me-1"></i>Dapatkan Data Projek
+      <i class="fas fa-sync-alt me-1"></i> Dapatkan Data Projek
     </button>
   </div>
 
@@ -47,43 +43,300 @@
           <td class="d-none d-md-table-cell">{{ project.lokasi }}</td>
           <td class="d-none d-md-table-cell">{{ project.tanggal_mulai }}</td>
           <td class="d-none d-md-table-cell">{{ project.tanggal_selesai }}</td>
-          <td class="d-none d-md-table-cell">{{ project.supervisor_proyek }}</td>
-
+          <td class="d-none d-md-table-cell">
+            {{ project.supervisor_proyek }}
+          </td>
           <td class="text-center">
             <a
               href="{% url 'detail_projek' project.pk %}"
               class="btn btn-sm btn-info mb-1"
-              style="background-color: #3d5a71; color: white">
+              style="background-color: #3d5a71; color: white"
+            >
               <i class="fa-regular fa-file-lines"></i> Details
             </a>
+
             <a
               href="{% url 'objectives_view' %}?project={{ project.pk }}"
               class="btn btn-sm btn-info"
-              style="background-color: #3d5a71; color: white">
+              style="background-color: #3d5a71; color: white"
+            >
               <i class="fa-solid fa-plus"></i> Tambah Data
             </a>
+
             <button
               class="btn btn-sm btn-warning"
+              style="background-color: #3d5a71; color: white"
               data-bs-toggle="modal"
               data-bs-target="#statusModal"
               data-project-id="{{ project.pk }}"
               data-project-name="{{ project.nama_projek }}"
               data-current-status="{{ project.status_projek }}"
-              style="background-color: #3d5a71; color: white">
+
+              {% if project.objective.last_edited %}
+                data-objective-last-edited="{{ project.objective.last_edited|timesince }} yang lalu"
+                data-objective-last-edited-by="{{ project.objective.last_edited_by|get_editor_name }}"
+              {% endif %}
+
+              {% if project.experience.last_edited %}
+                data-experience-last-edited="{{ project.experience.last_edited|timesince }} yang lalu"
+                data-experience-last-edited-by="{{ project.experience.last_edited_by|get_editor_name }}"
+              {% endif %}
+
+              {% if project.implementation.last_edited %}
+                data-implementation-last-edited="{{ project.implementation.last_edited|timesince }} yang lalu"
+                data-implementation-last-edited-by="{{ project.implementation.last_edited_by|get_editor_name }}"
+              {% endif %}
+
+              {% if project.limitation.last_edited %}
+                data-limitation-last-edited="{{ project.limitation.last_edited|timesince }} yang lalu"
+                data-limitation-last-edited-by="{{ project.limitation.last_edited_by|get_editor_name }}"
+              {% endif %}
+
+              {% if project.realization.last_edited %}
+                data-realization-last-edited="{{ project.realization.last_edited|timesince }} yang lalu"
+                data-realization-last-edited-by="{{ project.realization.last_edited_by|get_editor_name }}"
+              {% endif %}
+
+              {% if project.planning.last_edited %}
+                data-planning-last-edited="{{ project.planning.last_edited|timesince }} yang lalu"
+                data-planning-last-edited-by="{{ project.planning.last_edited_by|get_editor_name }}"
+              {% endif %}>
               <i class="fa-solid fa-pen"></i> Status
             </button>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7">
-            <p>list projek kosong</p>
-          </td>
+          <td colspan="7" class="text-center">List projek kosong</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-<script src="{% static 'js/projecttable.js' %}"></script>
+
+ <script>
+  class ProjekTable {
+  constructor(tableContainerId) {
+    this.container = document.getElementById(tableContainerId);
+    if (!this.container) return console.error(`Container "${tableContainerId}" not found`);
+
+    this.searchInput = this.container.querySelector("#searchInput");
+    this.syncButton = this.container.querySelector("[data-sync-url]");
+    this.table = this.container.querySelector("table");
+
+    this.statusModal = document.getElementById("statusModal");
+    this.statusForm = document.getElementById("statusForm");
+    this.modalProjectId = document.getElementById("modalProjectId");
+    this.statusDropdown = document.getElementById("statusDropdown");
+
+    this.alertContainer = this.createAlertContainer();
+    this.initEvents();
+  }
+
+  createAlertContainer() {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = "position-fixed top-0 end-0 p-3";
+    alertDiv.style.zIndex = "1100";
+    document.body.appendChild(alertDiv);
+    return alertDiv;
+  }
+
+  createLastEditedContainer() {
+    let existing = this.statusModal.querySelector("#lastEditedInfo");
+    if (existing) return existing;
+
+    const container = document.createElement("div");
+    container.id = "lastEditedInfo";
+    container.className = "last-edited-info mt-3";
+    container.innerHTML = `
+      <h6>Riwayat Perubahan:</h6>
+      <ul class="list-unstyled small" id="lastEditedList"></ul>
+    `;
+
+    const statusContainer = this.statusModal.querySelector(".modal-body > .mb-3");
+    if (statusContainer) statusContainer.insertAdjacentElement("afterend", container);
+    return container;
+  }
+
+  initEvents() {
+    if (this.searchInput) {
+      this.searchInput.addEventListener("input", () => {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => this.filterRows(), 300);
+      });
+    }
+
+    if (this.syncButton) {
+      this.syncButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (confirm("Apakah Anda yakin ingin menyinkronkan data projek?")) {
+          this.syncProjects();
+        }
+      });
+    }
+
+    if (this.statusModal && this.statusForm) {
+      this.statusModal.addEventListener("show.bs.modal", (event) => {
+        const button = event.relatedTarget;
+        const projectId = button.getAttribute("data-project-id");
+        const currentStatus = button.getAttribute("data-current-status");
+
+        if (!this.statusForm.dataset.originalAction) {
+          this.statusForm.dataset.originalAction = this.statusForm.getAttribute("action");
+        }
+
+        const formAction = this.statusForm.dataset.originalAction.replace(/\/\d+\//, `/${projectId}/`);
+        this.statusForm.setAttribute("action", formAction);
+
+        this.modalProjectId.value = projectId;
+        this.statusDropdown.value = currentStatus;
+
+        this.displayLastEditedInfo(button);
+      });
+
+      this.statusForm.addEventListener("submit", () => {
+        const submitButton = this.statusForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Memproses...
+        `;
+      });
+    }
+  }
+
+  displayLastEditedInfo(button) {
+    const container = this.createLastEditedContainer();
+    const listContainer = container.querySelector("#lastEditedList");
+    listContainer.innerHTML = "";
+
+    const sections = [
+      { name: "Meaningful Objective", attr: "objective" },
+      { name: "Intelligence Experience", attr: "experience" },
+      { name: "Intelligence Implementation", attr: "implementation" },
+      { name: "Batasan Pengembangan", attr: "limitation" },
+      { name: "Status Realisasi", attr: "realization" },
+      { name: "Perencanaan", attr: "planning" },
+    ];
+
+    let hasEdits = false;
+
+    sections.forEach(({ name, attr }) => {
+      const time = button.getAttribute(`data-${attr}-last-edited`);
+      const editor = button.getAttribute(`data-${attr}-last-edited-by`);
+      if (time) {
+        const item = document.createElement("li");
+        item.className = "d-flex align-items-center mb-2";
+        item.innerHTML = `
+          <span class="badge bg-secondary me-2">${name}</span>
+          <span class="flex-grow-1">${time}</span>
+          ${editor ? `<small class="text-muted">oleh ${editor}</small>` : ""}
+        `;
+        listContainer.appendChild(item);
+        hasEdits = true;
+      }
+    });
+
+    if (!hasEdits) {
+      const item = document.createElement("li");
+      item.className = "text-muted";
+      item.textContent = "Belum ada perubahan yang tercatat";
+      listContainer.appendChild(item);
+    }
+  }
+
+  async syncProjects() {
+    const button = this.syncButton;
+    const originalText = button.innerHTML;
+
+    try {
+      button.disabled = true;
+      button.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Memproses...`;
+
+      const csrfToken = this.getCSRFToken();
+      const response = await fetch(button.dataset.syncUrl, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Sinkronisasi gagal");
+
+      this.showAlert(`Sinkronisasi berhasil! ${data.created || 0} dibuat, ${data.updated || 0} diperbarui.`, "success");
+      if (data.refresh_needed) setTimeout(() => location.reload(), 750);
+    } catch (err) {
+      this.showAlert(err.message, "danger");
+    } finally {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
+
+  getCSRFToken() {
+    return (
+      document.querySelector("[name=csrfmiddlewaretoken]")?.value ||
+      document.cookie.match(/csrftoken=([^;]+)/)?.[1] ||
+      null
+    );
+  }
+
+  showAlert(message, type) {
+    const alert = document.createElement("div");
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = "alert";
+    alert.innerHTML = `
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    this.alertContainer.innerHTML = "";
+    this.alertContainer.appendChild(alert);
+
+    setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert).close(), 5000);
+  }
+
+  filterRows() {
+    const keyword = this.searchInput.value.trim().toLowerCase();
+    const rows = this.table.querySelectorAll("tbody tr");
+    let visible = 0;
+
+    rows.forEach((row) => {
+      if (row.querySelector("td[colspan]")) {
+        row.style.display = "none";
+        return;
+      }
+
+      const match = row.textContent.toLowerCase().includes(keyword);
+      row.style.display = match ? "" : "none";
+      if (match) visible++;
+    });
+
+    this.showNoResultsMessage(visible === 0 && keyword !== "");
+  }
+
+  showNoResultsMessage(show) {
+    let noResultsRow = this.table.querySelector(".no-results-row");
+    if (show && !noResultsRow) {
+      noResultsRow = document.createElement("tr");
+      noResultsRow.className = "no-results-row";
+      noResultsRow.innerHTML = `
+        <td colspan="${this.table.querySelectorAll("thead th").length}">
+          <div class="text-center py-3 text-muted">Tidak ada projek yang cocok dengan pencarian Anda</div>
+        </td>
+      `;
+      this.table.querySelector("tbody").appendChild(noResultsRow);
+    } else if (!show && noResultsRow) {
+      noResultsRow.remove();
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  new ProjekTable("projekTableContainer");
+});
+ </script>
 {% endblock %}

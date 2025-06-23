@@ -1,7 +1,6 @@
-{% extends 'layout/base.html' %} 
-{% load form_tags %} 
-{% load widget_tweaks %}
-{% block title %} CRUDify | Login {% endblock %} 
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block title %} CRUDify | Login {% endblock %}
 {% block content %}
 <div class="p-4 rounded-2 shadow-sm border-2 mx-auto" style="width: 450px">
   <h2 class="text-center fw-bold mb-3 fs-4">Selamat Datang Kembali!</h2>
@@ -23,7 +22,12 @@
       <label for="{{ form.username.id_for_label }}" class="form-label">Username atau Email</label>
       <div class="input-group">
         <span class="input-group-text"><i class="fa fa-user"></i></span>
-        {{ form.username|add_class:"form-control"|attr:"autocomplete:username" }}
+        <input type="text" 
+               name="{{ form.username.name }}" 
+               id="{{ form.username.id_for_label }}" 
+               class="form-control" 
+               autocomplete="username"
+               value="{{ form.username.value|default_if_none:'' }}">
       </div>
       {% if form.username.errors %}
         <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
@@ -35,7 +39,11 @@
       <label for="{{ form.password.id_for_label }}" class="form-label">Kata Sandi</label>
       <div class="input-group">
         <span class="input-group-text"><i class="fa fa-lock"></i></span>
-        {{ form.password|add_class:"form-control"|attr:"id:password"|attr:"autocomplete:current-password" }}
+        <input type="password" 
+               name="{{ form.password.name }}" 
+               id="password" 
+               class="form-control" 
+               autocomplete="current-password">
         <button type="button" class="btn btn-outline-secondary" id="togglePassword" tabindex="-1">
           <i class="fa-solid fa-eye" id="toggleIcon"></i>
         </button>

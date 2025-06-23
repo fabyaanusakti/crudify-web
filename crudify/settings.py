@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'corsheaders',
-    'widget_tweaks',
 ]
 
 REST_FRAMEWORK = {

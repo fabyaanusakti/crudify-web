@@ -16,9 +16,7 @@ dj-database-url==3.0.0
 Django==5.2.3
 django-cors-headers==4.7.0
 django-extensions==4.1
-django-widget-tweaks==1.5.0
 djangorestframework==3.16.0
-graphviz==0.21
 gunicorn==23.0.0
 html5lib==1.1
 idna==3.10
@@ -34,7 +32,6 @@ pycparser==2.22
 pydot==4.0.1
 pyHanko==0.28.0
 pyhanko-certvalidator==0.27.0
-pylint==3.3.7
 pyparsing==3.2.3
 pypdf==5.5.0
 python-bidi==0.6.6

@@ -244,7 +244,7 @@ class ObjectivesForm(forms.ModelForm):
     class Meta:
         model = ObjectiveModels
         fields = '__all__'
-        exclude = ['project'] 
+        exclude = ['project', 'last_edited', 'last_edited_by']
         labels = {
             'organizational': 'Organizational Objectives',
             'leading_indicators': 'Leading Indicators',
@@ -265,7 +265,7 @@ class ExperienceForm(forms.ModelForm):
     class Meta:
         model = ExperienceModels
         fields = '__all__'
-        exclude = ['project'] 
+        exclude = ['project', 'last_edited', 'last_edited_by'] 
         labels = {
             'automate': 'Automate',
             'prompt': 'Prompt',
@@ -289,7 +289,7 @@ class ImplementationForm(forms.ModelForm):
     class Meta:
         model = ImplementationModels
         fields = '__all__'
-        exclude = ['project'] 
+        exclude = ['project', 'last_edited', 'last_edited_by']  
         labels = {
             'business_process': 'Proses bisnis sistem cerdas',
             'technology': 'Teknologi yang akan digunakan',
@@ -309,7 +309,7 @@ class LimitationForm(forms.ModelForm):
     class Meta:
         model = LimitationModels
         fields = '__all__'
-        exclude = ['project'] 
+        exclude = ['project', 'last_edited', 'last_edited_by']  
         labels = {
             'limitation': 'Batasan Pengembangan'
         }
@@ -328,7 +328,7 @@ class RealizationForm(forms.ModelForm):
     class Meta:
         model = RealizationModels
         fields = '__all__'
-        exclude = ['project'] 
+        exclude = ['project', 'last_edited', 'last_edited_by']  
         labels = {
             'realization': 'Status Realisasi'
         }
@@ -347,7 +347,7 @@ class PlanningForm(forms.ModelForm):
     class Meta:
         model = PlanningModels
         fields = '__all__'
-        exclude = ['project'] 
+        exclude = ['project', 'last_edited', 'last_edited_by']  
         labels = {
             'deployment': 'Pelaksanaan Deployment',
             'maintenance': 'Pemeliharaan Sistem',

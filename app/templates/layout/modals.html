@@ -4,7 +4,8 @@
   id="loginRequiredModal"
   tabindex="-1"
   aria-labelledby="loginRequiredModalLabel"
-  aria-hidden="true">
+  aria-hidden="true"
+>
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -26,7 +27,8 @@
           href="{% url 'login' %}"
           class="btn btn-primary"
           style="background-color: #3d5a71; color: white"
-          ><i class="fa-solid fa-right-to-bracket"></i> Masuk</a>
+          ><i class="fa-solid fa-right-to-bracket"></i> Masuk</a
+        >
       </div>
     </div>
   </div>
@@ -38,7 +40,8 @@
   id="cameraModal"
   tabindex="-1"
   aria-labelledby="cameraModalLabel"
-  aria-hidden="true">
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -65,7 +68,8 @@
             type="button"
             id="capture-btn"
             class="btn btn-login w-100"
-            style="background-color: #3d5a71; color: white">
+            style="background-color: #3d5a71; color: white"
+          >
             Ambil Foto
           </button>
         </div>
@@ -75,30 +79,72 @@
 </div>
 
 <!-- Status Modal -->
-<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+<div
+  class="modal fade"
+  id="statusModal"
+  tabindex="-1"
+  aria-labelledby="statusModalLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" action="{% url 'update_project_status' 0 %}" id="statusForm">
+      <form
+        method="POST"
+        action="{% url 'update_project_status' 0 %}"
+        id="statusForm"
+      >
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="statusModalLabel">Ubah Status Projek</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
+
         <div class="modal-body">
           <input type="hidden" name="project_id" id="modalProjectId" />
+
           <div class="mb-3">
             <label for="statusDropdown" class="form-label">Status</label>
-            <select name="status" id="statusDropdown" class="form-select" required>
+            <select
+              name="status"
+              id="statusDropdown"
+              class="form-select"
+              required
+            >
               <option value="">Pilih Status</option>
-              <option value="berlangsung">Berlangsung</option>
-              <option value="selesai">Selesai</option>
-              <option value="gagal">Gagal</option>
+              {% for key, value in status_choices %}
+              <option value="{{ key }}">{{ value }}</option>
+              {% endfor %}
             </select>
           </div>
+
+          <div class="last-edited-info mt-3" id="lastEditedInfo">
+            <h6>Riwayat Perubahan:</h6>
+            <ul class="list-unstyled small" id="lastEditedList">
+              <li class="text-muted">Belum ada perubahan yang tercatat</li>
+            </ul>
+          </div>
         </div>
+
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-primary" style="background-color: #3d5a71; color: white">Simpan</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Tutup
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            style="background-color: #3d5a71; color: white"
+          >
+            Simpan
+          </button>
         </div>
       </form>
     </div>
