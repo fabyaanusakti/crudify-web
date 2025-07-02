@@ -41,26 +41,30 @@ def sync_projects(*, delete_stale=True, force=False):
 
             processed_data = {}
             errors = []
-            
+
             for field, (expected_type, default_value) in required_fields.items():
                 value = item.get(field, default_value)
-                
+                processed_data[field] = value
+
                 if value is None:
                     errors.append(f"{field} wajib diisi")
                 elif not isinstance(value, expected_type):
                     errors.append(f"Tipe data tidak valid untuk {field} (harus {expected_type.__name__})")
-                else:
-                    processed_data[field] = value
 
             if errors:
                 print(f"Melewati proyek {project_id}: {', '.join(errors)}")
                 skipped_ids.add(project_id)
                 continue
 
+            processed_data['tanggal_mulai'] = parse_date(processed_data['tanggal_mulai'])
+            processed_data['tanggal_selesai'] = parse_date(processed_data['tanggal_selesai'])
+
+            if not processed_data['tanggal_mulai'] or not processed_data['tanggal_selesai']:
+                print(f"Melewati proyek {project_id}: gagal parsing tanggal")
+                skipped_ids.add(project_id)
+                continue
+
             try:
-                processed_data['tanggal_mulai'] = parse_date(processed_data['tanggal_mulai'])
-                processed_data['tanggal_selesai'] = parse_date(processed_data['tanggal_selesai'])
-                
                 obj, created_flag = ProjekModel.objects.update_or_create(
                     id_projek=project_id,
                     defaults={
@@ -81,6 +85,7 @@ def sync_projects(*, delete_stale=True, force=False):
 
             except Exception as e:
                 print(f"Gagal memproses proyek {project_id}: {str(e)}")
+                skipped_ids.add(project_id)
                 continue
 
         if delete_stale:
@@ -93,6 +98,7 @@ def sync_projects(*, delete_stale=True, force=False):
         print(f"Sinkronisasi selesai — Ditambahkan: {created}, Diperbarui: {updated}, Dihapus: {deleted}")
         if skipped_ids:
             print(f"Proyek yang dilewati ({len(skipped_ids)}): {', '.join(skipped_ids)}")
+
         return created, updated, deleted
 
     except Exception as e:

@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import check_password
 from app.api.services.project_api_sync import sync_projects
 from django.core.files.base import ContentFile
 from django.template.loader import get_template
@@ -11,10 +12,9 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 from django.urls import reverse
 from django.db.models import Count
-from django.views.generic.edit import DeleteView
+from django.views import View
 from xhtml2pdf import pisa
 from django.conf import settings
-from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import *
 from .models import *
@@ -74,22 +74,77 @@ def login_view(request):
 def profile_view(request):
     if request.method == 'POST':
         form = CustomUserProfileEditForm(request.POST, request.FILES, instance=request.user)
-        
+
         image_data = request.POST.get('image_data', None)
         if image_data:
-            format, imgstr = image_data.split(';base64,') 
-            ext = format.split('/')[-1] 
+            format, imgstr = image_data.split(';base64,')
+            ext = format.split('/')[-1]
             data = ContentFile(base64.b64decode(imgstr), name=f'live_capture.{ext}')
-            
+
             request.user.picture.save(f'live_capture.{ext}', data, save=False)
-        
+
         if form.is_valid():
             form.save()
             return redirect('profile')
     else:
         form = CustomUserProfileEditForm(instance=request.user)
-    
+
     return render(request, 'users/profile.html', {'form': form})
+
+# ---- Start of Forgot Password Views Controller ---- #
+class ForgotPasswordView(View):
+    template_name = 'users/forgot_password.html'
+
+    def get(self, request):
+        form = ForgotPasswordForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = ForgotPasswordForm(request.POST)
+        if not form.is_valid():
+            return render(request, self.template_name, {'form': form})
+
+        username_or_email = form.cleaned_data['username_or_email']
+        user = User.objects.filter(
+            Q(username__iexact=username_or_email) |
+            Q(email__iexact=username_or_email)
+        ).first()
+
+        return redirect('reset_password', username=user.username)
+
+class ResetPasswordView(View):
+    template_name = 'users/reset_password.html'
+
+    def get(self, request, username):
+        user = User.objects.filter(username=username).first()
+        if not user:
+            messages.error(request, "Link reset password tidak valid.")
+            return redirect('forgot_password')
+        return render(request, self.template_name, {'username': username})
+
+    def post(self, request, username):
+        user = User.objects.filter(username=username).first()
+        if not user:
+            messages.error(request, "Link reset kata sandi tidak valid.")
+            return redirect('forgot_password')
+
+        new_password = request.POST.get('new_password1')
+        confirm_password = request.POST.get('new_password2')
+
+
+        if check_password(new_password, user.password):
+            messages.error(request, "Kata sandi baru tidak boleh sama dengan kata sandi lama!")
+            return render(request, self.template_name, {'username': username})
+
+        if new_password != confirm_password:
+            messages.error(request, "Kata sandi tidak cocok!")
+            return render(request, self.template_name, {'username': username})
+
+        user.set_password(new_password)
+        user.save()
+        messages.success(request, "Kata sandi berhasil diubah! Silakan login dengan kata sandi baru Anda.")
+        return redirect('login')
+# ---- End of Forgot Password Views Controller ---- #
 
 def logout_view(request):
     logout(request)
@@ -100,7 +155,7 @@ def logout_view(request):
 @login_required
 def settings_view(request):
     config = AppConfig.load()
-    
+
     if request.method == 'POST':
         form = AppConfigForm(request.POST, instance=config)
         if form.is_valid():
@@ -109,7 +164,7 @@ def settings_view(request):
             return redirect('settings')
     else:
         form = AppConfigForm(instance=config)
-    
+
     return render(request, 'app/settings.html', {'form': form})
 
 # ---- End of Api Setting Controller ---- #
@@ -133,11 +188,11 @@ def projek_view(request):
 
         'realization',
         'realization__last_edited_by',
-        
+
         'planning',
         'planning__last_edited_by',
     )
-    
+
     return render(request, 'app/pages/projek/main.html', {
         'projects': projects,
         'status_choices': ProjekModel.STATUS_PROJEK,
@@ -149,7 +204,7 @@ def update_project_status(request, pk):
     try:
         # Get the new status from POST data
         new_status = request.POST.get('status')
-        
+
         if not new_status:
             messages.error(request, 'Status is required')
             return redirect('projek')
@@ -166,7 +221,7 @@ def update_project_status(request, pk):
 
         projek.status_projek = new_status
         projek.save()
-        
+
         messages.success(request, 'Status updated successfully')
         return redirect('projek')
 
@@ -217,7 +272,7 @@ def objectives_view(request):
         if request.method == 'POST':
             form = ObjectivesForm(request.POST, instance=objective)
             if form.is_valid():
-                obj = form.save(commit=False) 
+                obj = form.save(commit=False)
                 obj.last_edited_by = request.user
                 obj.save()
                 return redirect(f"{reverse('experience_view')}?project={project.id}")
@@ -257,7 +312,7 @@ def experience_view(request):
         if request.method == 'POST':
             form = ExperienceForm(request.POST, instance=experience)
             if form.is_valid():
-                obj = form.save(commit=False) 
+                obj = form.save(commit=False)
                 obj.last_edited_by = request.user
                 obj.save()
                 return redirect(f"{reverse('implementation_view')}?project={project.id}")
@@ -297,7 +352,7 @@ def implementation_view(request):
         if request.method == 'POST':
             form = ImplementationForm(request.POST, instance=implementation)
             if form.is_valid():
-                obj = form.save(commit=False) 
+                obj = form.save(commit=False)
                 obj.last_edited_by = request.user
                 obj.save()
                 return redirect(f"{reverse('limitation_view')}?project={project.id}")
@@ -337,13 +392,13 @@ def limitation_view(request):
         if request.method == 'POST':
             form = LimitationForm(request.POST, instance=limitation)
             if form.is_valid():
-                obj = form.save(commit=False) 
+                obj = form.save(commit=False)
                 obj.last_edited_by = request.user
                 obj.save()
                 return redirect(f"{reverse('realization_view')}?project={project.id}")
         else:
             form = LimitationForm(instance=limitation)
-    
+
     return render(request, 'app/pages/limitation/main.html', {
         'projects': user_projects,
         'project': project,
@@ -377,7 +432,7 @@ def realization_view(request):
         if request.method == 'POST':
             form = RealizationForm(request.POST, instance=realization)
             if form.is_valid():
-                obj = form.save(commit=False) 
+                obj = form.save(commit=False)
                 obj.last_edited_by = request.user
                 obj.save()
                 return redirect(f"{reverse('planning_view')}?project={project.id}")
@@ -417,7 +472,7 @@ def planning_view(request):
         if request.method == 'POST':
             form = PlanningForm(request.POST, instance=planning)
             if form.is_valid():
-                obj = form.save(commit=False) 
+                obj = form.save(commit=False)
                 obj.last_edited_by = request.user
                 obj.save()
                 return redirect('detail_projek', pk=project.id)
@@ -451,7 +506,7 @@ def detail_projek_view(request, pk):
 
 def download_pdf(request, pk):
     project = get_object_or_404(ProjekModel, pk=pk)
-    
+
     context = {
         'project': project,
         'objective': getattr(project, 'objective', None),
@@ -461,26 +516,26 @@ def download_pdf(request, pk):
         'realization': getattr(project, 'realization', None),
         'planning': getattr(project, 'planning', None)
     }
-    
+
     template_path = 'layout/pdf_template.html'
     template = get_template(template_path)
     html = template.render(context)
-    
+
     response = HttpResponse(content_type='application/pdf')
-    
+
     filename = f"{project.nama_projek}_documentation.pdf".replace(" ", "_")
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    
+
     pisa_status = pisa.CreatePDF(
-        html, 
+        html,
         dest=response,
         encoding='UTF-8',
         link_callback=lambda uri, _: os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ''))
     )
-    
+
     if pisa_status.err:
         return HttpResponse('We had some errors generating the PDF. Please try again later.')
-    
+
     return response
 
 # ---- Start of Details Views Controller ---- #

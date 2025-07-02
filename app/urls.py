@@ -8,12 +8,14 @@ urlpatterns = [
     path('', home, name='home'),
     # ---- End of Homepage View Address ---- #
 
-    # ---- Start of Users Page Address---- # 
-    path('register/', register_view, name='register'),
+    # ---- Start of Users Page Address---- #
+    path('daftar/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('profile/', profile_view, name='profile'),
-    # ---- End of Users  Page Address---- # 
+    path('lupa-kata-sandi/', ForgotPasswordView.as_view(), name='forgot_password'),
+    path('reset-kata-sandi/<str:username>/', ResetPasswordView.as_view(), name='reset_password'),
+    # ---- End of Users  Page Address---- #
 
     # ---- Start of Project Page Address ---- #
     path('projek/', projek_view, name='projek'),

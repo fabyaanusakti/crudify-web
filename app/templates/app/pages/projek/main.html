@@ -1,7 +1,7 @@
-{% extends 'layout/base.html' %} 
-{% load static %} 
-{% load project_tags %} 
-{% block title %}CRUDify{% endblock %} 
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load project_tags %}
+{% block title %}CRUDify{% endblock %}
 {% block content %}
 <div class="p-4 rounded-2 shadow-sm border-2" id="projekTableContainer">
   <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
@@ -41,15 +41,15 @@
         <tr>
           <td>{{ project.nama_projek }}</td>
           <td class="d-none d-md-table-cell">{{ project.lokasi }}</td>
-          <td class="d-none d-md-table-cell">{{ project.tanggal_mulai }}</td>
-          <td class="d-none d-md-table-cell">{{ project.tanggal_selesai }}</td>
+          <td class="tanggal d-none d-md-table-cell" data-date="{{ project.tanggal_mulai|date:'Y-m-d' }}"></td>
+          <td class="tanggal d-none d-md-table-cell" data-date="{{ project.tanggal_selesai|date:'Y-m-d' }}"></td>
           <td class="d-none d-md-table-cell">
             {{ project.supervisor_proyek }}
           </td>
           <td class="text-center">
             <a
               href="{% url 'detail_projek' project.pk %}"
-              class="btn btn-sm btn-info mb-1"
+              class="btn btn-sm btn-info"
               style="background-color: #3d5a71; color: white"
             >
               <i class="fa-regular fa-file-lines"></i> Details
@@ -64,7 +64,7 @@
             </a>
 
             <button
-              class="btn btn-sm btn-warning"
+              class="btn btn-sm btn-info"
               style="background-color: #3d5a71; color: white"
               data-bs-toggle="modal"
               data-bs-target="#statusModal"
@@ -73,32 +73,38 @@
               data-current-status="{{ project.status_projek }}"
 
               {% if project.objective.last_edited %}
-                data-objective-last-edited="{{ project.objective.last_edited|timesince }} yang lalu"
+                data-objective-project-name="{{ project.nama_projek }}"
+                data-objective-last-edited="{{ project.objective.last_edited|timesince }} ago"
                 data-objective-last-edited-by="{{ project.objective.last_edited_by|get_editor_name }}"
               {% endif %}
 
               {% if project.experience.last_edited %}
-                data-experience-last-edited="{{ project.experience.last_edited|timesince }} yang lalu"
+                data-objective-project-name="{{ project.nama_projek }}"
+                data-experience-last-edited="{{ project.experience.last_edited|timesince }} ago"
                 data-experience-last-edited-by="{{ project.experience.last_edited_by|get_editor_name }}"
               {% endif %}
 
               {% if project.implementation.last_edited %}
-                data-implementation-last-edited="{{ project.implementation.last_edited|timesince }} yang lalu"
+                data-objective-project-name="{{ project.nama_projek }}"
+                data-implementation-last-edited="{{ project.implementation.last_edited|timesince }} ago"
                 data-implementation-last-edited-by="{{ project.implementation.last_edited_by|get_editor_name }}"
               {% endif %}
 
               {% if project.limitation.last_edited %}
-                data-limitation-last-edited="{{ project.limitation.last_edited|timesince }} yang lalu"
+                data-objective-project-name="{{ project.nama_projek }}"
+                data-limitation-last-edited="{{ project.limitation.last_edited|timesince }} ago"
                 data-limitation-last-edited-by="{{ project.limitation.last_edited_by|get_editor_name }}"
               {% endif %}
 
               {% if project.realization.last_edited %}
-                data-realization-last-edited="{{ project.realization.last_edited|timesince }} yang lalu"
+                data-objective-project-name="{{ project.nama_projek }}"
+                data-realization-last-edited="{{ project.realization.last_edited|timesince }} ago"
                 data-realization-last-edited-by="{{ project.realization.last_edited_by|get_editor_name }}"
               {% endif %}
 
               {% if project.planning.last_edited %}
-                data-planning-last-edited="{{ project.planning.last_edited|timesince }} yang lalu"
+                data-objective-project-name="{{ project.nama_projek }}"
+                data-planning-last-edited="{{ project.planning.last_edited|timesince }} ago"
                 data-planning-last-edited-by="{{ project.planning.last_edited_by|get_editor_name }}"
               {% endif %}>
               <i class="fa-solid fa-pen"></i> Status
@@ -114,6 +120,15 @@
     </table>
   </div>
 </div>
+
+<script>
+    document.querySelectorAll('.tanggal').forEach(function(el) {
+    const date = new Date(el.dataset.date);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const localized = date.toLocaleDateString('id-ID', options);
+    el.textContent = localized;
+  });
+</script>
 
  <script>
   class ProjekTable {
@@ -207,8 +222,13 @@
   }
 
   displayLastEditedInfo(button) {
-    const container = this.createLastEditedContainer();
-    const listContainer = container.querySelector("#lastEditedList");
+    const projectName = button.getAttribute("data-project-name");
+    const currentStatus = button.getAttribute("data-current-status");
+
+    document.getElementById("modalProjectName").textContent = projectName;
+    document.getElementById("currentProjectName").textContent = projectName;
+
+    const listContainer = document.getElementById("lastEditedList");
     listContainer.innerHTML = "";
 
     const sections = [

@@ -94,7 +94,7 @@ class CustomRegisterForm(UserCreationForm):
         if commit:
             user.save()
         return user
-    
+
 class CustomLoginForm(forms.Form):
     username = forms.CharField(
         label="Username atau Email",
@@ -143,7 +143,7 @@ class CustomLoginForm(forms.Form):
             username=username_or_email,
             password=password
         )
-        
+
         if self.user_cache is None:
             # If username auth failed, try email auth
             try:
@@ -161,10 +161,10 @@ class CustomLoginForm(forms.Form):
 
         # Set the backend explicitly
         self.user_cache.backend = 'django.contrib.auth.backends.ModelBackend'  # or your custom backend
-        
+
         self.confirm_login_allowed(self.user_cache)
         return self.cleaned_data
-    
+
     def confirm_login_allowed(self, user):
         """
         Controls whether the given User may log in.
@@ -174,7 +174,7 @@ class CustomLoginForm(forms.Form):
                 _("Akun ini tidak aktif."),
                 code='inactive',
             )
-        
+
         if user.has_usable_password() is False:
             raise forms.ValidationError(
                 _("Akun ini tidak dapat login menggunakan password."),
@@ -184,9 +184,70 @@ class CustomLoginForm(forms.Form):
     def get_user(self):
         return self.user_cache
 
+class ForgotPasswordForm(forms.Form):
+    username_or_email = forms.CharField(
+        label="Username atau Email",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Masukkan Username atau Email',
+            'autofocus': True,
+        }),
+        strip=False,
+    )
+
+    def clean_username_or_email(self):
+        username_or_email = self.cleaned_data.get('username_or_email')
+
+        user = User.objects.filter(
+            Q(username__iexact=username_or_email) |
+            Q(email__iexact=username_or_email)
+        ).first()
+
+        if not user:
+            raise ValidationError("Username atau email tidak ditemukan.")
+
+        return username_or_email
+
+class ResetPasswordForm(forms.Form):
+    new_password1 = forms.CharField(
+        label="Password Baru",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Masukkan Password Baru',
+            'id': 'new_password1',
+        }),
+        strip=False,
+    )
+
+    new_password2 = forms.CharField(
+        label="Konfirmasi Password Baru",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ulangi Password Baru',
+            'id': 'new_password2',
+        }),
+        strip=False,
+    )
+
+    def clean_new_password1(self):
+        password = self.cleaned_data.get('new_password1')
+        if len(password) < 8:
+            raise ValidationError("Password harus minimal 8 karakter.")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("new_password1")
+        password2 = cleaned_data.get("new_password2")
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Password dan konfirmasi tidak cocok.")
+
+        return cleaned_data
+
 class CustomUserProfileEditForm(UserChangeForm):
     password = None
-    
+
     email = forms.EmailField(
         required=True,
         label='Email',
@@ -239,7 +300,7 @@ class AppConfigForm(forms.ModelForm):
         }
 # ---- End of Api Endpoint Form ---- #
 
-# ---- Start of Meaningfull Objectives Form ---- #
+# ---- Start of Meaningful Objectives Form ---- #
 class ObjectivesForm(forms.ModelForm):
     class Meta:
         model = ObjectiveModels
@@ -250,22 +311,28 @@ class ObjectivesForm(forms.ModelForm):
             'leading_indicators': 'Leading Indicators',
             'user_outcomes': 'User Outcomes',
             'model_properties': 'Model Properties',
+            'status': 'Status'
         }
-
         widgets = {
-            field: forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': f'Masukan {label}'
-            }) for field, label in labels.items()
+            **{
+                field: forms.Textarea(attrs={
+                    'class': 'form-control rounded-2 shadow-sm border-1',
+                    'placeholder': f'Masukan {label}'
+                }) for field, label in labels.items() if field != 'status'
+            },
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-2 shadow-sm border-1'
+            })
         }
-# ---- End of Meaningfull Objectives Form ---- #
+# ---- End of Meaningful Objectives Form ---- #
+
 
 # ---- Start of Intelligence Experience Form ---- #
 class ExperienceForm(forms.ModelForm):
     class Meta:
         model = ExperienceModels
         fields = '__all__'
-        exclude = ['project', 'last_edited', 'last_edited_by'] 
+        exclude = ['project', 'last_edited', 'last_edited_by']
         labels = {
             'automate': 'Automate',
             'prompt': 'Prompt',
@@ -273,91 +340,122 @@ class ExperienceForm(forms.ModelForm):
             'organization': 'Organization',
             'system_objectives': 'Achieve System Objectives',
             'minimize_flaws': 'Minimize Intelligence Flaws',
-            'create_data': 'Create Data to Grow'
+            'create_data': 'Create Data to Grow',
+            'status': 'Status'
         }
-
         widgets = {
-            field: forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': f'Masukan {label}'
-            }) for field, label in labels.items()
+            **{
+                field: forms.Textarea(attrs={
+                    'class': 'form-control rounded-2 shadow-sm border-1',
+                    'placeholder': f'Masukan {label}'
+                }) for field, label in labels.items() if field != 'status'
+            },
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-2 shadow-sm border-1'
+            })
         }
 # ---- End of Intelligence Experience Form ---- #
+
 
 # ---- Start of Intelligence Implementation Form ---- #
 class ImplementationForm(forms.ModelForm):
     class Meta:
         model = ImplementationModels
         fields = '__all__'
-        exclude = ['project', 'last_edited', 'last_edited_by']  
+        exclude = ['project', 'last_edited', 'last_edited_by']
         labels = {
             'business_process': 'Proses bisnis sistem cerdas',
             'technology': 'Teknologi yang akan digunakan',
-            'build_process': 'Proses yang akan dibangun'
+            'build_process': 'Proses yang akan dibangun',
+            'status': 'Status'
         }
-
         widgets = {
-            field: forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': f'Masukan {label}'
-            }) for field, label in labels.items()
+            **{
+                field: forms.Textarea(attrs={
+                    'class': 'form-control rounded-2 shadow-sm border-1',
+                    'placeholder': f'Masukan {label}'
+                }) for field, label in labels.items() if field != 'status'
+            },
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-2 shadow-sm border-1'
+            })
         }
 # ---- End of Intelligence Implementation Form ---- #
 
+
 # ---- Start of Limitation Form ---- #
 class LimitationForm(forms.ModelForm):
+    limitation = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control rounded-2 shadow-sm border-1',
+            'rows': 3,
+            'cols': 60
+        })
+    )
+
     class Meta:
         model = LimitationModels
         fields = '__all__'
-        exclude = ['project', 'last_edited', 'last_edited_by']  
+        exclude = ['project', 'last_edited', 'last_edited_by']
         labels = {
-            'limitation': 'Batasan Pengembangan'
+            'limitation': 'Batasan Pengembangan',
+            'status': 'Status'
         }
-
-        limitation = forms.CharField(
-            widget=forms.Textarea(attrs={             
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'rows': 3,
-                'cols': 60
-    })
-)
+        widgets = {
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-2 shadow-sm border-1'
+            })
+        }
 # ---- End of Limitation Form ---- #
+
 
 # ---- Start of Realization Form ---- #
 class RealizationForm(forms.ModelForm):
+    realization = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control rounded-2 shadow-sm border-1',
+            'rows': 3,
+            'cols': 60
+        })
+    )
+
     class Meta:
         model = RealizationModels
         fields = '__all__'
-        exclude = ['project', 'last_edited', 'last_edited_by']  
+        exclude = ['project', 'last_edited', 'last_edited_by']
         labels = {
-            'realization': 'Status Realisasi'
+            'realization': 'Status Realisasi',
+            'status': 'Status'
         }
-
-        realization = forms.CharField(
-            widget=forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'rows': 3,
-                'cols': 60
+        widgets = {
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-2 shadow-sm border-1'
             })
-        )
+        }
 # ---- End of Realization Form ---- #
+
 
 # ---- Start of Planning Form ---- #
 class PlanningForm(forms.ModelForm):
     class Meta:
         model = PlanningModels
         fields = '__all__'
-        exclude = ['project', 'last_edited', 'last_edited_by']  
+        exclude = ['project', 'last_edited', 'last_edited_by']
         labels = {
             'deployment': 'Pelaksanaan Deployment',
             'maintenance': 'Pemeliharaan Sistem',
-            'operating': 'Pelaksanaan Sistem Operasi'
+            'operating': 'Pelaksanaan Sistem Operasi',
+            'status': 'Status'
         }
-
         widgets = {
-            field: forms.Textarea(attrs={
-                'class': 'form-control rounded-2 shadow-sm border-1',
-                'placeholder': f'Masukan {label}'
-            }) for field, label in labels.items()
+            **{
+                field: forms.Textarea(attrs={
+                    'class': 'form-control rounded-2 shadow-sm border-1',
+                    'placeholder': f'Masukan {label}'
+                }) for field, label in labels.items() if field != 'status'
+            },
+            'status': forms.Select(attrs={
+                'class': 'form-select rounded-2 shadow-sm border-1'
+            })
         }
 # ---- End of Planning Form ---- #

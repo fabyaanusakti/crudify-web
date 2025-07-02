@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+from .constants import STATUS_CHOICES
 
 
 # Create your models here.
@@ -9,13 +10,13 @@ from django.contrib.auth.models import AbstractUser
 # ---- Start of User Profile Models ---- #
 class CustomUserProfileModels(AbstractUser):
     picture = models.ImageField(
-        upload_to='images/', 
-        default='images/default.png', 
-        verbose_name='Foto Anggota', 
-        blank=True, 
+        upload_to='images/',
+        default='images/default.png',
+        verbose_name='Foto Anggota',
+        blank=True,
         null=True
     )
-    
+
     def __str__(self):
         return self.username
 # ---- End of User Profile Models ---- #
@@ -25,7 +26,7 @@ class AppConfig(models.Model):
     projek_api_endpoint = models.URLField(
         default='https://michaelbriant.pythonanywhere.com/api/proyek/'
     )
-    # 
+    #
     meaningful_data_endpoint = models.URLField(
         default='https://fabyaanusakti.pythonanywhere.com/api/projek-data/'
     )
@@ -50,7 +51,7 @@ class AppConfig(models.Model):
     status_endpoint = models.URLField(
         default='https://fabyaanusakti.pythonanywhere.com/api/status-only/'
     )
-    
+
 
     class Meta:
         verbose_name = 'Application Configuration'
@@ -71,15 +72,14 @@ class ProjekModel(models.Model):
     STATUS_PROJEK = [
         ('berlangsung', 'Berlangsung'),
         ('selesai', 'Selesai'),
-        ('gagal', 'Gagal'),
     ]
-    
+
     id_projek = models.IntegerField(unique=True)
     nama_projek = models.CharField(max_length=255)
     deskripsi = models.TextField(blank=True)
     lokasi = models.CharField(max_length=255, blank=True)
-    tanggal_mulai = models.DateField()
-    tanggal_selesai = models.DateField()
+    tanggal_mulai = models.DateField(null=True, blank=True)
+    tanggal_selesai = models.DateField(null=True, blank=True)
     supervisor_proyek = models.CharField(max_length=255, blank=True)
     status_projek = models.CharField(choices=STATUS_PROJEK, max_length=20, default="berlangsung")
 
@@ -94,7 +94,7 @@ class ProjekModel(models.Model):
 # ---- End of Project Model Models ---- #
 
 # ---- Start of Meaningful Objectives Models ---- #
-class ObjectiveModels(models.Model):  
+class ObjectiveModels(models.Model):
     project = models.OneToOneField(
         ProjekModel,
         on_delete=models.CASCADE,
@@ -102,11 +102,17 @@ class ObjectiveModels(models.Model):
         verbose_name='Related Project'
     )
 
+    STATUS = [
+        ('berlangsung', 'Berlangsung'),
+        ('selesai', 'Selesai'),
+    ]
+
     organizational = models.TextField(verbose_name='Organizational Objectives')
     leading_indicators = models.TextField(verbose_name='Leading Indicators')
     user_outcomes = models.TextField(verbose_name='User Outcomes')
     model_properties = models.TextField(verbose_name='Model Properties')
-    
+    status = models.CharField(choices=STATUS, max_length=20, default="berlangsung")
+
     last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
     last_edited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -122,7 +128,7 @@ class ObjectiveModels(models.Model):
 # ---- End of Meaningful Objectives Models ---- #
 
 # ---- Start of Intelligence Experience Models ---- #
-class ExperienceModels(models.Model):  
+class ExperienceModels(models.Model):
     project = models.OneToOneField(
         ProjekModel,
         on_delete=models.CASCADE,
@@ -137,6 +143,7 @@ class ExperienceModels(models.Model):
     system_objectives = models.TextField(verbose_name='System Objectives')
     minimize_flaws = models.TextField(verbose_name='Minimize Intelligence Flaws')
     create_data = models.TextField(verbose_name='Create data to grow')
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="berlangsung")
 
     last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
     last_edited_by = models.ForeignKey(
@@ -153,7 +160,7 @@ class ExperienceModels(models.Model):
 # ---- End of Intelligence Experience Models ---- #
 
 # ---- Start of Intelligence Implementation Models ---- #
-class ImplementationModels(models.Model):  
+class ImplementationModels(models.Model):
     project = models.OneToOneField(
         ProjekModel,
         on_delete=models.CASCADE,
@@ -164,6 +171,7 @@ class ImplementationModels(models.Model):
     business_process = models.TextField(verbose_name='Business Process')
     technology = models.TextField(verbose_name='Used Technology')
     build_process = models.TextField(verbose_name='Built Process')
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="berlangsung")
 
     last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
     last_edited_by = models.ForeignKey(
@@ -180,15 +188,16 @@ class ImplementationModels(models.Model):
 # ---- End of Intelligence Implementation Models ---- #
 
 # ---- Start of Limitation Models ---- #
-class LimitationModels(models.Model):  
+class LimitationModels(models.Model):
     project = models.OneToOneField(
         ProjekModel,
         on_delete=models.CASCADE,
         related_name='limitation',
         verbose_name='Related Project'
     )
-    
+
     limitation = models.TextField(verbose_name='Limitation')
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="berlangsung")
 
     last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
     last_edited_by = models.ForeignKey(
@@ -214,6 +223,7 @@ class RealizationModels(models.Model):
     )
 
     realization = models.TextField(verbose_name='Realization')
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="berlangsung")
 
     last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
     last_edited_by = models.ForeignKey(
@@ -241,6 +251,7 @@ class PlanningModels(models.Model):
     deployment = models.TextField(verbose_name='Deployment')
     maintenance = models.TextField(verbose_name='Maintenance')
     operating = models.TextField(verbose_name='Operating System')
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="berlangsung")
 
     last_edited = models.DateTimeField(auto_now=True, verbose_name="Terakhir Diedit")
     last_edited_by = models.ForeignKey(
